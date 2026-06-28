@@ -1,0 +1,33 @@
+{
+  "name": "pam-core",
+  "version": "1.1.0",
+  "description": "Reusable Codex skill pack for practical software work.",
+  "author": {
+    "name": "pam-core"
+  },
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "skills",
+    "engineering",
+    "security",
+    "ponytail"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "pam-core",
+    "shortDescription": "Practical reusable Codex skills.",
+    "longDescription": "A reusable skill pack for simple, secure, low-noise software engineering across projects.",
+    "developerName": "pam-core",
+    "category": "Productivity",
+    "capabilities": [
+      "Skills"
+    ],
+    "defaultPrompt": [
+      "Use pam-core for this coding task.",
+      "Review this change with pam-core.",
+      "Keep this simple and secure."
+    ],
+    "brandColor": "#2563EB"
+  }
+}
