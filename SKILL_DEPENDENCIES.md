@@ -1,6 +1,8 @@
 # Skill Dependencies
 
-Use this map after `project-understanding` and `skill-orchestrator`.
+Use this map after `project-understanding`. For vague, short, ambiguous,
+subjective, mixed, or high-risk prompts, run Prompt Intelligence before
+`skill-orchestrator`.
 Load the smallest set that covers the task.
 
 ## Priority Levels
@@ -11,14 +13,20 @@ Load the smallest set that covers the task.
 
 ## Recommended Activation Order
 1. Critical context: `project-understanding`, `security`, `prompt-injection-defense`.
-2. Orchestration: `skill-orchestrator`, `task-planning`, `context-management`.
-3. Scope and risk: `scope-control`, `change-impact-analysis`, `root-cause-analysis`.
-4. Simplicity and design: `ponytail`, `architecture`, `refactoring`.
-5. Domain specialists: backend, frontend, data, documents, finance, school, AI.
-6. Implementation specialists: language, framework, database, scripts.
-7. Verification: `testing`.
-8. Quality gates: matching review skills from `QUALITY_GATES.md`.
-9. Finish: `code-review`, `release-readiness`, `git` when version control is
+2. Prompt intelligence when needed: `prompt-understanding`,
+   `prompt-normalization`, `prompt-gap-analysis`, `task-extraction`,
+   `success-criteria`.
+3. Execution control for broad or mixed work: `execution-monitor`,
+   `task-sequencing`, then `patch-strategy` when patches may be large or
+   encoding-sensitive.
+4. Orchestration: `skill-orchestrator`, `task-planning`, `context-management`.
+5. Scope and risk: `scope-control`, `change-impact-analysis`, `root-cause-analysis`.
+6. Simplicity and design: `ponytail`, `architecture`, `refactoring`.
+7. Domain specialists: backend, frontend, data, documents, finance, school, AI.
+8. Implementation specialists: language, framework, database, scripts.
+9. Verification: `testing`.
+10. Quality gates: matching review skills from `QUALITY_GATES.md`.
+11. Finish: `code-review`, `release-readiness`, `git` when version control is
    requested.
 
 ## Core Dependencies
@@ -28,11 +36,19 @@ Load the smallest set that covers the task.
 | skill-orchestrator | Critical | multi-skill tasks | headroom |
 | security | Critical | auth, files, secrets, destructive actions, external input | prompt-injection-defense |
 | prompt-injection-defense | Critical | AI, MCP, agents, external documents, web/log/email content | llm-best-practices |
+| prompt-understanding | Critical when matching | vague, short, ambiguous, subjective, mixed, or high-risk prompts | prompt-normalization |
+| prompt-normalization | High when matching | prompts that need objective, scope, constraints, risks, and success criteria | prompt-gap-analysis |
+| prompt-gap-analysis | High when matching | missing facts, ambiguity, contradictions, risky assumptions | security |
+| task-extraction | High when matching | mixed or multi-part prompts | task-planning |
+| success-criteria | Critical when matching | subjective, user-visible, high-risk, multi-step, release, or bug-fix work | testing |
 | task-planning | High | multi-step or phased work | scope-control |
 | scope-control | High | broad or ambiguous changes | ponytail |
 | change-impact-analysis | High | shared contracts, schemas, APIs, permissions, money, routing maps | testing |
 | root-cause-analysis | High | bugs, regressions, failing checks | debugging |
 | context-management | High | long tasks, many files, many active skills | headroom |
+| execution-monitor | Critical when matching | broad, long, tool-heavy, patch-heavy, validation-heavy, or stalled tasks | context-management |
+| task-sequencing | Critical when matching | mixed prompts, broad requests, bug plus security plus UI work | task-planning |
+| patch-strategy | High when matching | large patches, multi-file edits, HTML/CSS, encoding or mojibake, failed patch context | scope-control |
 | secrets-management | High | credentials, tokens, keys, env files | deployment |
 | dependency-audit | Medium | dependency or lockfile changes | safe-command-execution |
 | safe-command-execution | High | writes, installs, scripts, destructive or untrusted commands | automation-scripts |
@@ -62,6 +78,9 @@ Load the smallest set that covers the task.
 | Change impact | change-impact-analysis | project-understanding, testing, code-review |
 | Root cause | root-cause-analysis | debugging, testing, project-understanding |
 | Context continuity | context-management | headroom, skill-orchestrator, code-review |
+| Execution control | execution-monitor | task-sequencing, patch-strategy, context-management, testing |
+| Mixed task ordering | task-sequencing | execution-monitor, task-planning, scope-control, success-criteria |
+| Patch safety | patch-strategy | execution-monitor, task-sequencing, scope-control, testing |
 | Architecture | architecture | ponytail, refactoring, security |
 | Secrets | secrets-management | security, deployment, safe-command-execution |
 | Dependencies | dependency-audit | ponytail, security, testing |
@@ -69,6 +88,11 @@ Load the smallest set that covers the task.
 | Command execution | safe-command-execution | security, prompt-injection-defense, automation-scripts |
 | Authorization | permissions-authorization | authentication, security, api-design, database-design |
 | Data privacy | data-privacy | security, document-system, financial-system |
+| User intent | prompt-understanding | prompt-normalization, prompt-gap-analysis, success-criteria |
+| Prompt normalization | prompt-normalization | prompt-understanding, task-extraction, skill-orchestrator |
+| Prompt gap analysis | prompt-gap-analysis | security, scope-control, testing |
+| Task extraction | task-extraction | task-planning, scope-control, skill-orchestrator |
+| Success criteria | success-criteria | testing, ux-review, code-review |
 | Quality gates | release-readiness | architecture-review, security-review, performance-review, maintainability-review, documentation-review, ux-review, regression-review, dependency-review, testing, code-review |
 | Architecture Gate | architecture-review | architecture, refactoring, change-impact-analysis |
 | Maintainability Gate | maintainability-review | ponytail, refactoring, scope-control |
@@ -101,6 +125,7 @@ Load the smallest set that covers the task.
 | Finance | financial-system | business-rules, sqlite, security, testing |
 | School systems | business-rules | authentication, database-design, api-design |
 | AI and MCP | llm-best-practices | prompt-injection-defense, headroom, security |
+| Prompt Intelligence | prompt-understanding | prompt-normalization, prompt-gap-analysis, task-extraction, success-criteria, skill-orchestrator |
 | Packaging | packaging | desktop-local, windows-desktop, deployment |
 | Debugging | debugging | project-understanding, testing, code-review |
 | Git | git | code-review, testing |
@@ -110,6 +135,8 @@ Load the smallest set that covers the task.
 - `desktop-local` and `saas` as product leads for the same app boundary.
 - Broad audit work and implementation skills in the same pass, unless the task
   is explicitly audit plus fix.
+- Functional bug fixing, security changes, and CSS/UI polish in the same edit
+  round; split them with `task-sequencing`.
 - `packaging` and `deployment` as leads for the same release target.
 - Multiple UI lead skills; use `ui-designer` as lead, with `anti-ai-ui`, `ux`,
   `accessibility`, `html-css`, `javascript`, and exact-match frontend
@@ -130,12 +157,22 @@ Load the smallest set that covers the task.
 - `change-impact-analysis` owns contract and regression impact.
 - `root-cause-analysis` owns failure cause.
 - `context-management` owns long-task continuity.
+- `execution-monitor` owns long-running execution limits and stalled-progress
+  detection.
+- `task-sequencing` owns mixed-prompt ordering before execution.
+- `patch-strategy` owns safe patch sizing and encoding-sensitive edit strategy.
 - `security` owns trust boundaries and destructive risk.
 - `secrets-management` owns credentials.
 - `safe-command-execution` owns risky commands.
 - `permissions-authorization` owns access control.
 - `data-privacy` owns private data exposure.
 - `dependency-audit` owns package risk.
+- `prompt-understanding` owns real user intent.
+- `prompt-normalization` owns the internal task structure.
+- `prompt-gap-analysis` owns missing facts, ambiguity, contradictions, and
+  prompt-level risk.
+- `task-extraction` owns splitting mixed requests into ordered tasks.
+- `success-criteria` owns completion criteria and final completion evidence.
 - Quality review skills own gate pass/fail assessment only.
 - `architecture-review` owns Architecture Gate assessment.
 - `maintainability-review` owns Maintainability Gate assessment.
@@ -162,8 +199,19 @@ Load the smallest set that covers the task.
 
 ## Mandatory Dependencies
 - Repository edit: `project-understanding`.
+- Vague, short, ambiguous, subjective, mixed, or high-risk prompt:
+  `prompt-understanding`, then matching Prompt Intelligence skills before
+  `skill-orchestrator`.
+- User-visible, subjective, bug-fix, release, or high-risk task:
+  `success-criteria` before execution and before final response.
 - Multi-skill task: `skill-orchestrator`.
 - Multi-step task: `task-planning`.
+- Long, broad, tool-heavy, patch-heavy, validation-heavy, or stalled task:
+  `execution-monitor`.
+- Mixed prompt combining bug, security, CSS/UI, docs, release, audit, or tests:
+  `task-sequencing` before edits.
+- Large patch, multi-file edit, HTML/CSS edit, mojibake, or failed patch
+  context: `patch-strategy`.
 - Broad or ambiguous task: `scope-control`.
 - Shared contract or routing change: `change-impact-analysis`.
 - Bug or failing check: `root-cause-analysis`.

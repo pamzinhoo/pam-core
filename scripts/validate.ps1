@@ -293,8 +293,17 @@ $forbiddenDirs = @(".git", ".agents", ".codex", ".cache", ".tmp", "node_modules"
 foreach ($dirName in $forbiddenDirs) {
   $matches = Get-ChildItem -LiteralPath $PluginRoot -Force -Recurse -Directory -ErrorAction SilentlyContinue |
     Where-Object { $_.Name -eq $dirName }
-  if ($matches) {
-    Write-Warning "Install-excluded directory present in source tree: $dirName"
+  foreach ($match in $matches) {
+    $childCount = @(Get-ChildItem -LiteralPath $match.FullName -Force -Recurse -ErrorAction SilentlyContinue).Count
+    $relativePath = $match.FullName
+    if ($relativePath.StartsWith($PluginRoot, [System.StringComparison]::OrdinalIgnoreCase)) {
+      $relativePath = $relativePath.Substring($PluginRoot.Length).TrimStart("\", "/")
+    }
+    if ($childCount -eq 0) {
+      Write-Warning "Install-excluded directory is empty: $relativePath. It will not be copied by install-windows.ps1; remove it manually if it is leftover local state."
+    } else {
+      Write-Warning "Install-excluded directory is present: $relativePath ($childCount item(s)). It will not be copied by install-windows.ps1; keep it only if it is intentional local state."
+    }
   }
 }
 

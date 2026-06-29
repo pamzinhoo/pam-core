@@ -129,7 +129,21 @@ skills, then add only the High or Medium skills that match the task.
 - Detect: prompts, models, agents, retrieval, tool calls, evals, context files.
 - Critical: `project-understanding`, `skill-orchestrator`, `security`,
   `prompt-injection-defense`.
-- High: `llm-best-practices`, `headroom`, `testing`, `code-review`.
+- High: `prompt-understanding`, `prompt-normalization`,
+  `prompt-gap-analysis`, `success-criteria`, `llm-best-practices`,
+  `headroom`, `testing`, `code-review`.
+- Medium: `task-extraction`, `python`, `api-design`, `document-system`,
+  `data-privacy`, `secrets-management`.
+- Optional: `performance`, `git`.
+
+## Prompt Intelligence
+- Detect: vague prompts, short prompts, mixed requests, subjective quality
+  goals, missing acceptance criteria, user-visible outcomes, or high-risk
+  requests where technical checks may pass without satisfying the user.
+- Critical: `project-understanding`, `security`, `prompt-understanding`,
+  `success-criteria`.
+- High: `prompt-normalization`, `prompt-gap-analysis`, `task-extraction`,
+  `skill-orchestrator`, `testing`, `code-review`.
 - Medium: `python`, `api-design`, `document-system`, `data-privacy`,
   `secrets-management`.
 - Optional: `performance`, `git`.

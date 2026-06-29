@@ -65,3 +65,18 @@ Permanent decision log for `pam-core`.
   is needed, and whether the proposed path is overengineered.
 - Impact: Future design should define this layer before adding a skill. Current
   routing remains unchanged.
+
+## DEC-009
+- Date: 2026-06-29
+- Context: During a correction to `execution-monitor`, the agent repeatedly
+  claimed a file change was applied, but rereading the file showed the target
+  line was still unchanged. The issue was resolved only through manual
+  CMD/PowerShell correction.
+- Decision: Register post-action verification as a mandatory future
+  improvement, without creating the skill yet.
+- Motive: Agent completion claims must be based on evidence from the final
+  state, not on trust that a tool action succeeded.
+- Impact: A future `result-verification` or `post-action-verification` skill
+  must require verification of the real result after any file change, command,
+  installation, migration, or configuration change before the agent says the
+  work is complete.

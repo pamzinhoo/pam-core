@@ -106,10 +106,14 @@ complex conditionals, or code likely to be reused.
 - The same logic is duplicated in risky places.
 - New flexibility is unused or speculative.
 - The change is hard to debug or extend safely.
+- Functional bug fixes, security work, and CSS/UI polish were mixed in one edit
+  round without sequencing.
+- A large multi-file patch was applied where small patches were practical.
 
 ### Participating Skills
 `maintainability-review`, `ponytail`, `refactoring`, `scope-control`,
-`testing`, `code-review`.
+`task-sequencing`, `patch-strategy`, `execution-monitor`, `testing`,
+`code-review`.
 
 ## Testing Gate
 
@@ -122,6 +126,7 @@ money, parsing, file, or UI changes.
 
 ### Approval Criteria
 - The smallest useful check is selected and run.
+- Relevant success criteria are defined before execution.
 - New risky logic has focused coverage when practical.
 - Relevant failures are investigated or reported.
 - Skipped checks are disclosed.
@@ -131,10 +136,13 @@ money, parsing, file, or UI changes.
 - Test results are claimed without execution.
 - Related failures are ignored.
 - High-risk behavior has no verification path.
+- A command, tool, or validation had no return for more than 23 minutes and the
+  task continued without stopping, summarizing, and asking for confirmation.
+- The same validation or review loop repeated without new evidence.
 
 ### Participating Skills
-`testing`, `regression-review`, `security-review`, `performance-review`,
-`code-review`.
+`testing`, `success-criteria`, `execution-monitor`, `regression-review`,
+`security-review`, `performance-review`, `code-review`.
 
 ## Documentation Gate
 
@@ -147,6 +155,8 @@ behavior, operational procedures, releases, or standards.
 
 ### Approval Criteria
 - Affected docs are identified.
+- New or changed skills include explicit success criteria where task completion
+  could otherwise be ambiguous.
 - Commands, file names, examples, and behavior match the change.
 - Documentation stays concise and points to owning skills or modules.
 - No sensitive data or unsafe instructions are exposed.
@@ -172,6 +182,8 @@ destructive UI actions, and any user-visible workflow.
 
 ### Approval Criteria
 - The primary workflow is visible and efficient.
+- Success criteria include user-visible outcome checks, not only technical file
+  changes.
 - Empty, loading, error, and success states are usable where relevant.
 - Labels and actions match user intent.
 - Interactive controls meet practical accessibility requirements.
@@ -183,8 +195,8 @@ destructive UI actions, and any user-visible workflow.
 - Keyboard, focus, label, contrast, or semantic blockers remain.
 
 ### Participating Skills
-`ux-review`, `accessibility-review`, `ux`, `ui-designer`, `accessibility`,
-`anti-ai-ui`, frontend specialists, `testing`, `code-review`.
+`ux-review`, `accessibility-review`, `success-criteria`, `ux`, `ui-designer`,
+`accessibility`, `anti-ai-ui`, frontend specialists, `testing`, `code-review`.
 
 ## Release Gate
 
@@ -198,6 +210,7 @@ approval handoff.
 
 ### Approval Criteria
 - Required gates have known pass/fail status.
+- Success criteria are passed, failed, or explicitly unverified.
 - Validation results are known.
 - Blockers and follow-up work are separated.
 - Rollback, migration, or handoff notes exist when needed.
@@ -207,6 +220,9 @@ approval handoff.
 - Validation was not run or failed without resolution.
 - Release blockers are hidden as follow-ups.
 - Deployment or approval is implied without user request.
+- The task stayed long-running without visible progress control.
+- Main requested items were complete but optional scope continued instead of
+  listing residual risks.
 
 ### Participating Skills
 `release-readiness`, `testing`, `code-review`, `documentation-review`,

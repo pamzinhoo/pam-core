@@ -3,17 +3,30 @@
 Long-term state for `pam-core`.
 
 ## Current Version
-- Manifest version: `1.1.0`
-- Governance state: Phase 11
-- Last updated: 2026-06-28
-- Release status: `1.1.0` ready; plugin reinstall not run.
+- Manifest version: `1.2.0`
+- Governance state: Phase 12 complete
+- Last updated: 2026-06-29
+- Release status: `1.2.0` prepared; plugin reinstall not run.
 
 ## Current Phase
-Phase 11: Audit, Cleanup, and Release 1.1.0 ready.
+Phase 12 complete: Prompt Intelligence Foundation and Execution Control for
+version 1.2.
 
-This phase audits the full pack, normalizes existing skills, strengthens
-validation, updates release documentation, and removes invalid source-tree
-metadata. It does not create new skills or reinstall the plugin.
+This phase added the first Prompt Intelligence layer so `pam-core` can
+understand vague prompts, normalize execution context, detect gaps, split mixed
+requests, and define success criteria before routing and execution. It does not
+implement Meta Orchestrator, UI Visual Review, or the broader version 2.0 skill
+roadmap.
+
+Execution Control was completed after a real long-running Working incident. It
+prevents silent stalled tools, broad patch loops, and mixed bug/security/CSS
+work from continuing without progress limits.
+
+Post-action verification was registered as a mandatory future improvement after
+an observed file-edit failure where an agent claimed a change was applied, but a
+final reread showed the target line was still unchanged. The corrective rule is:
+after any file change, command, installation, migration, or configuration
+change, the agent must verify the real result before saying the work is done.
 
 ## Completed Functionality
 - Personal Codex plugin manifest in `.codex-plugin/plugin.json`.
@@ -25,6 +38,8 @@ metadata. It does not create new skills or reinstall the plugin.
 - Modular architecture in `MODULES.md`.
 - Explicit quality gates in `QUALITY_GATES.md`.
 - Core and Security expansion from earlier phases.
+- Prompt Intelligence foundation for version 1.2.
+- Execution Control foundation for version 1.2.
 - Project governance documents from Phase 7.
 - Phase 8 normalization for remaining short skills.
 - Phase 9 stronger routing and cooperation documentation.
@@ -39,6 +54,7 @@ metadata. It does not create new skills or reinstall the plugin.
 - Database
 - Desktop
 - Business
+- Prompt Intelligence
 - AI
 - Security
 - Testing
@@ -62,6 +78,9 @@ metadata. It does not create new skills or reinstall the plugin.
 - `headroom`
 - `debugging`
 - `performance`
+- `execution-monitor`
+- `patch-strategy`
+- `task-sequencing`
 
 ### Backend
 - `fastapi`
@@ -123,6 +142,13 @@ metadata. It does not create new skills or reinstall the plugin.
 - `financial-system`
 - `saas`
 
+### Prompt Intelligence
+- `prompt-understanding`
+- `prompt-normalization`
+- `prompt-gap-analysis`
+- `task-extraction`
+- `success-criteria`
+
 ### AI
 - `llm-best-practices`
 - `prompt-injection-defense`
@@ -177,6 +203,8 @@ metadata. It does not create new skills or reinstall the plugin.
 - Phase 11: Audited the full pack, completed remaining skill normalization,
   fixed missing-skill references, strengthened validation, updated release
   docs, and cleaned invalid source-tree metadata.
+- Phase 12: Added Prompt Intelligence foundation skills, Execution Control
+  skills, and routing documentation for version 1.2.
 
 ## Roadmap
 - Keep `SKILL_DEPENDENCIES.md`, `PROJECT_PROFILES.md`, and `MODULES.md`
@@ -184,6 +212,12 @@ metadata. It does not create new skills or reinstall the plugin.
 - Evaluate a future Meta Orchestrator layer above `project-understanding` and
   `skill-orchestrator` before choosing technology, stack, module, or skill.
 - Add missing roadmap skills only after explicit approval.
+- Expand Prompt Intelligence only in future approved phases; do not add
+  `prompt-enhancement`, `intent-classifier`, or `ambiguity-resolution` as part
+  of Phase 12.
+- Create a future `result-verification` or `post-action-verification` skill to
+  enforce post-action verification after file edits, commands, installations,
+  migrations, and configuration changes.
 - Consider module and priority frontmatter in a future major version if the
   plugin format needs it.
 - Prepare a 2.0 architecture release only when routing and module metadata
@@ -193,6 +227,19 @@ metadata. It does not create new skills or reinstall the plugin.
 - Skills are grouped by module, not by project type.
 - A future Meta Orchestrator is planned as a pre-routing decision layer; it is
   not implemented as a skill yet.
+- Prompt Intelligence runs before `skill-orchestrator` only when prompts are
+  vague, short, ambiguous, subjective, mixed, or high-risk.
+- Execution Control runs before broad, mixed, long-running, patch-heavy, or
+  validation-heavy work.
+- Tool or command silence past 23 minutes requires stopping, summarizing
+  progress, and asking for confirmation.
+- Mixed prompts must be split before execution. Functional bug fixes, security
+  changes, and CSS/UI polish must not be edited in the same round.
+- Large multi-file patches on HTML with encoding or mojibake are forbidden;
+  patch one file at a time and reduce failed contexts to ASCII anchors.
+- Post-action verification is mandatory future behavior: after any file change,
+  command, installation, migration, or configuration change, the agent must
+  verify the real result before claiming completion.
 - `project-understanding` runs before repository edits.
 - `skill-orchestrator` owns routing.
 - `testing` and `code-review` close non-trivial changes.
@@ -204,6 +251,7 @@ metadata. It does not create new skills or reinstall the plugin.
 
 ## Pending Work
 - Reinstall the plugin only after explicit approval.
+- Do not reinstall the plugin until explicitly approved.
 - Specify the future Meta Orchestrator before implementation. It should answer
   whether a project needs a proposed technology, whether SQLite is enough or
   PostgreSQL is needed, whether local desktop is enough or SaaS is warranted,
@@ -212,7 +260,9 @@ metadata. It does not create new skills or reinstall the plugin.
   least complexity.
 - Decide later whether module and priority frontmatter are worth a 2.0
   migration.
-- Add roadmap skills only in future phases; do not add them as part of Phase 11.
+- Add roadmap skills only in future phases; do not add them as part of Phase 12.
+- Create the future `result-verification` or `post-action-verification` skill;
+  do not create it until explicitly approved.
 
 ## Known Problems
 - The installed plugin cache may lag behind the workspace until reinstall.
@@ -221,4 +271,5 @@ metadata. It does not create new skills or reinstall the plugin.
   cleaned; release tracking should use the user's chosen version-control source.
 
 ## Next Phase
-- Controlled plugin reinstall after explicit approval.
+- Decide the next approved roadmap item after release `1.2.0`; keep plugin
+  reinstall separate and explicit.

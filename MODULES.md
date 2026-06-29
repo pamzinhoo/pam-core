@@ -48,6 +48,7 @@ The official modules are:
 - Database
 - Desktop
 - Business
+- Prompt Intelligence
 - AI
 - Security
 - Testing
@@ -71,6 +72,9 @@ Coordinate work, preserve context, and keep changes simple.
 - Project discovery.
 - Skill routing.
 - Task planning.
+- Execution progress limits.
+- Mixed task sequencing.
+- Patch sizing and encoding-sensitive edit strategy.
 - Scope control.
 - Change impact analysis.
 - Root cause analysis.
@@ -82,6 +86,9 @@ Coordinate work, preserve context, and keep changes simple.
 - `project-understanding`
 - `skill-orchestrator`
 - `task-planning`
+- `execution-monitor`
+- `task-sequencing`
+- `patch-strategy`
 - `scope-control`
 - `change-impact-analysis`
 - `root-cause-analysis`
@@ -100,8 +107,10 @@ Coordinate work, preserve context, and keep changes simple.
 
 ### Priorities
 - Critical: `project-understanding`, `skill-orchestrator`
-- High: `task-planning`, `scope-control`, `change-impact-analysis`,
-  `root-cause-analysis`, `context-management`, `ponytail`, `headroom`
+- Critical when matching: `execution-monitor`, `task-sequencing`
+- High: `task-planning`, `patch-strategy`, `scope-control`,
+  `change-impact-analysis`, `root-cause-analysis`, `context-management`,
+  `ponytail`, `headroom`
 - Medium: `architecture`, `debugging`, `refactoring`
 - Optional: `performance`
 
@@ -112,6 +121,10 @@ Coordinate work, preserve context, and keep changes simple.
 - `project-understanding` owns discovery.
 - `skill-orchestrator` owns routing.
 - `task-planning` owns sequencing.
+- `execution-monitor` owns long-running execution limits and stalled-progress
+  detection.
+- `task-sequencing` owns ordering mixed prompts before execution.
+- `patch-strategy` owns safe patch sizing and encoding-sensitive edits.
 - `scope-control` owns scope boundaries.
 - `change-impact-analysis` owns regression and contract impact.
 - `root-cause-analysis` owns failure cause.
@@ -425,12 +438,62 @@ Keep domain rules explicit, auditable, and protected by tests.
 - Priority: Alta.
 - Complexity: Alta.
 
+## Prompt Intelligence
+
+### Objective
+Understand, normalize, and validate user intent before execution so the agent
+does not treat technical activity as task completion.
+
+### Responsibilities
+- User intent understanding.
+- Prompt normalization.
+- Gap and ambiguity detection.
+- Mixed-task extraction.
+- Success criteria definition.
+
+### Skills
+- `prompt-understanding`
+- `prompt-normalization`
+- `prompt-gap-analysis`
+- `task-extraction`
+- `success-criteria`
+
+### Dependencies
+- Depends on Security for unsafe or untrusted prompt content.
+- Depends on AI for prompt and agent workflow discipline.
+- Supports Core before routing when prompts are vague, ambiguous, subjective,
+  mixed, or high-risk.
+
+### Priorities
+- Critical when matching: `prompt-understanding`, `success-criteria`
+- High when matching: `prompt-normalization`, `prompt-gap-analysis`,
+  `task-extraction`
+
+### Cooperation Rules
+- Prompt Intelligence runs after initial project context when needed and before
+  `skill-orchestrator`.
+- `prompt-understanding` owns the user's real intent.
+- `prompt-normalization` owns the internal task structure.
+- `prompt-gap-analysis` owns missing facts, contradictions, and risk signals.
+- `task-extraction` owns splitting mixed requests into ordered tasks.
+- `success-criteria` owns completion criteria before execution and final status.
+- These skills do not choose the full skill stack; `skill-orchestrator` still
+  owns routing.
+
+### Roadmap
+- Existing skills: all listed above.
+- Not in this phase: `prompt-enhancement`, `intent-classifier`,
+  `ambiguity-resolution`, Meta Orchestrator, or UI Visual Review.
+- Priority: Alta.
+- Complexity: Media.
+
 ## AI
 
 ### Objective
 Build AI, agent, MCP, and context workflows with clear guardrails.
 
 ### Responsibilities
+- Prompt-intelligence cooperation.
 - Prompt structure.
 - Tool and MCP behavior.
 - Context management.
@@ -444,6 +507,8 @@ Build AI, agent, MCP, and context workflows with clear guardrails.
 - `skill-orchestrator`
 
 ### Dependencies
+- Depends on Prompt Intelligence for vague, ambiguous, subjective, mixed, or
+  high-risk user prompts.
 - Depends on Security for trust boundaries.
 - Depends on Testing for evals and structured output checks.
 - Depends on Documentation for skill and prompt standards.
@@ -455,6 +520,8 @@ Build AI, agent, MCP, and context workflows with clear guardrails.
 - Optional: `document-system`
 
 ### Cooperation Rules
+- Prompt Intelligence clarifies the user request before AI workflow design when
+  the prompt itself is the risk.
 - `prompt-injection-defense` owns untrusted instructions.
 - `llm-best-practices` owns prompt and output design.
 - `headroom` owns context discipline.
@@ -463,7 +530,8 @@ Build AI, agent, MCP, and context workflows with clear guardrails.
 ### Roadmap
 - Existing skills: all listed above.
 - Missing skills: `mcp-server`, `tool-design`, `structured-outputs`,
-  `rag`, `evals`, `agent-memory`.
+  `rag`, `evals`, `agent-memory`, `prompt-enhancement`,
+  `intent-classifier`, `ambiguity-resolution`.
 - Priority: Alta.
 - Complexity: Alta.
 
