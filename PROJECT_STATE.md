@@ -4,24 +4,23 @@ Long-term state for `pam-core`.
 
 ## Current Version
 - Manifest version: `1.2.0`
-- Governance state: Phase 13 validation partially complete
+- Governance state: Phase 14 complete
 - Last updated: 2026-06-30
-- Release status: Phase 13 workspace changes prepared; plugin reinstall not run.
+- Release status: Installed and validated through Codex local package and cache.
 
 ## Current Phase
-Phase 13 validation partially complete: Multi-Agent Compatibility.
+Phase 14 complete: Final consistency registration and validation.
 
-This phase starts the shared-core, thin-adapter architecture so `pam-core` can
-be reused by multiple agents without duplicating skills. Codex remains supported
-through the existing adapter. Claude Code has an initial adapter through
-`CLAUDE.md` and `.claude-plugin/plugin.json`.
+This phase records the validated final state after consistency auditing,
+validation hardening, automatic audit report generation, installation, and
+post-install comparison across the checkout, local package, and Codex cache.
 
 The shared core remains `skills/`, `MODULES.md`, `SKILL_DEPENDENCIES.md`,
 `PROJECT_PROFILES.md`, `QUALITY_GATES.md`, `SKILL_GUIDELINES.md`, and
-`PROJECT_STATE.md`.
+`PROJECT_STATE.md`. The physical skill inventory is 93 skills.
 
-This phase does not reinstall the Codex plugin, automate Claude installation,
-duplicate `skills/`, or change existing skill behavior.
+This phase did not create or remove skills and did not change existing skill
+behavior.
 
 ## Completed Functionality
 - Personal Codex plugin manifest in `.codex-plugin/plugin.json`.
@@ -43,6 +42,10 @@ duplicate `skills/`, or change existing skill behavior.
 - Phase 11 audit cleanup for release preparation.
 - Claude adapter structural validation through `scripts/validate-claude.ps1`,
   called by `scripts/validate.ps1`.
+- Phase 14 consistency validation across checkout, local package, and Codex
+  cache with 93 physical skills and 117 compared files after install
+  exclusions.
+- Automatic audit report generation in `docs/audit-report.md`.
 
 ## Existing Modules
 - Core
@@ -205,6 +208,9 @@ duplicate `skills/`, or change existing skill behavior.
 - Phase 13: Added the initial multi-agent compatibility base with a Claude Code
   adapter, documentation, and Claude-specific structural validation while
   keeping the existing Codex adapter intact.
+- Phase 14: Normalized skill references into Existing, Planned, and Concepts /
+  technologies; hardened validation; generated an audit report; and confirmed
+  checkout, local package, and Codex cache consistency after installation.
 
 ## Roadmap
 - Keep `SKILL_DEPENDENCIES.md`, `PROJECT_PROFILES.md`, and `MODULES.md`
@@ -252,10 +258,11 @@ duplicate `skills/`, or change existing skill behavior.
 - Plugin reinstall happens only after explicit approval.
 - `pam-core` uses one shared core with thin agent adapters. Do not duplicate
   `skills/` for Codex, Claude Code, or generic agents.
+- `SKILL_DEPENDENCIES.md` is an operational map for existing physical skills
+  only. Roadmap items, technologies, and concepts must be classified in
+  `MODULES.md`.
 
 ## Pending Work
-- Reinstall the plugin only after explicit approval.
-- Do not reinstall the plugin until explicitly approved.
 - Specify the future Meta Orchestrator before implementation. It should answer
   whether a project needs a proposed technology, whether SQLite is enough or
   PostgreSQL is needed, whether local desktop is enough or SaaS is warranted,
@@ -271,13 +278,10 @@ duplicate `skills/`, or change existing skill behavior.
   is verified.
 
 ## Known Problems
-- The installed plugin cache may lag behind the workspace until reinstall.
 - Claude Code plugin loading has not been manually verified in this phase.
 - The Claude plugin manifest is intentionally minimal and may need schema
   expansion after practical testing.
 - `MODULES.md` intentionally lists future roadmap skills that do not exist yet.
-- This workspace may not be a Git repository after invalid source metadata is
-  cleaned; release tracking should use the user's chosen version-control source.
 
 ## Next Phase
 - Verify Claude Code adapter loading manually, then decide whether to add

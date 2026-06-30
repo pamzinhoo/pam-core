@@ -7,6 +7,16 @@ everything.
 Use this file with `AGENTS.md`, `SKILL_DEPENDENCIES.md`,
 `PROJECT_PROFILES.md`, and `SKILL_GUIDELINES.md`.
 
+## Skill Reference Classes
+Use these labels consistently in governance docs:
+
+- Existing skills: physical skill directories that exist under `skills/` and
+  contain `SKILL.md`.
+- Planned skills: future skill candidates that do not exist yet.
+- Concepts / technologies: frameworks, tools, project artifacts, architecture
+  ideas, test types, or domain concepts. These are not skills unless a future
+  phase creates a matching directory in `skills/`.
+
 ## Principles
 - A module owns a domain, not a project type.
 - A skill has one lead responsibility.
@@ -36,6 +46,9 @@ Use this file with `AGENTS.md`, `SKILL_DEPENDENCIES.md`,
   domain-specific checks.
 - `ui-designer` should lead UI decisions; `anti-ai-ui`, `ux`, `html-css`, and
   `accessibility` should support it.
+- Skills ending in `-review` should evaluate gates, risk, or readiness after
+  implementation; they should not lead implementation or replace
+  `code-review`.
 - `skill-orchestrator` should own routing; no domain skill should decide the
   whole skill stack.
 
@@ -133,9 +146,9 @@ Coordinate work, preserve context, and keep changes simple.
 
 ### Roadmap
 - Existing skills: all listed above.
-- Future layer: Meta Orchestrator above `project-understanding` and
+- Concepts / technologies: Meta Orchestrator above `project-understanding` and
   `skill-orchestrator`, not implemented yet.
-- Missing skills: `module-planner`, `risk-classifier`, `meta-orchestrator`.
+- Planned skills: `module-planner`, `risk-classifier`, `meta-orchestrator`.
 - Priority: Alta.
 - Complexity: Media.
 
@@ -201,6 +214,9 @@ Build safe backend APIs and services with stable contracts.
 - `api-design` leads generic REST work.
 - `fastapi` leads FastAPI-specific work.
 - `python` owns implementation style.
+- Python and FastAPI specialists activate only for the exact concern being
+  changed; they cooperate with the general lead instead of becoming parallel
+  leads.
 - `fastapi-authentication` owns FastAPI identity extraction; use
   `permissions-authorization` for access decisions.
 - `fastapi-dependencies` owns request-scoped dependency wiring.
@@ -215,7 +231,8 @@ Build safe backend APIs and services with stable contracts.
   `python-packaging`, `python-performance`, `python-logging`,
   `python-error-handling`, `fastapi-authentication`, `fastapi-dependencies`,
   `fastapi-background-tasks`, `fastapi-websockets`, `fastapi-validation`.
-- Missing skills: `rest-api`, `pydantic`, `webhooks`, `openapi-contracts`.
+- Planned skills: `rest-api`, `webhooks`, `openapi-contracts`.
+- Concepts / technologies: `pydantic`.
 - Priority: Alta.
 - Complexity: Media.
 
@@ -281,6 +298,8 @@ Create practical, accessible, non-generic product interfaces.
 - `javascript` owns browser behavior.
 - `accessibility` is not optional for interactive controls.
 - Use specialist skills only when their exact pattern is present.
+- UI specialists refine their surface; they should not become co-leads unless
+  the user request is specifically about that surface.
 - `responsive-design` owns viewport behavior; `mobile-first-ui` owns
   phone-first product flows.
 - `form-design`, `table-design`, and `dashboard-design` own their specific UI
@@ -295,7 +314,8 @@ Create practical, accessible, non-generic product interfaces.
 
 ### Roadmap
 - Existing skills: all listed above.
-- Missing skills: `react`, `charts`.
+- Planned skills: `charts`.
+- Concepts / technologies: `react`.
 - Priority: Alta.
 - Complexity: Alta.
 
@@ -345,12 +365,15 @@ Protect data integrity through clear models, constraints, and transactions.
 - `database-migrations` owns rollout and data-safety planning.
 - `query-optimization` owns query-plan and index performance work.
 - `transactions` owns multi-step write consistency.
+- Database specialists cooperate with `database-design` when their exact concern
+  is touched; do not call them for unrelated persistence-adjacent work.
 - Do not let app code replace database constraints when constraints fit.
 
 ### Roadmap
 - Existing skills: `database-design`, `sqlite`, `sqlalchemy`, `alembic`,
   `database-migrations`, `query-optimization`, `transactions`.
-- Missing skills: `postgres`, `data-import`, `backup-restore`.
+- Planned skills: `data-import`, `backup-restore`.
+- Concepts / technologies: `postgres`.
 - Priority: Alta.
 - Complexity: Alta.
 
@@ -392,8 +415,8 @@ Build local tools that respect user files, OS paths, and simple delivery.
 
 ### Roadmap
 - Existing skills: all listed above.
-- Missing skills: `tkinter`, `pyside`, `file-watchers`, `local-config`,
-  `windows-installer`.
+- Planned skills: `file-watchers`, `local-config`, `windows-installer`.
+- Concepts / technologies: `tkinter`, `pyside`.
 - Priority: Media.
 - Complexity: Media.
 
@@ -433,7 +456,7 @@ Keep domain rules explicit, auditable, and protected by tests.
 
 ### Roadmap
 - Existing skills: `business-rules`, `financial-system`, `saas`.
-- Missing skills: `school-system`, `inventory-system`, `crm-system`,
+- Planned skills: `school-system`, `inventory-system`, `crm-system`,
   `billing`, `audit-log`, `reporting`.
 - Priority: Alta.
 - Complexity: Alta.
@@ -482,8 +505,9 @@ does not treat technical activity as task completion.
 
 ### Roadmap
 - Existing skills: all listed above.
-- Not in this phase: `prompt-enhancement`, `intent-classifier`,
-  `ambiguity-resolution`, Meta Orchestrator, or UI Visual Review.
+- Planned skills: `prompt-enhancement`, `intent-classifier`,
+  `ambiguity-resolution`.
+- Concepts / technologies: Meta Orchestrator, UI Visual Review.
 - Priority: Alta.
 - Complexity: Media.
 
@@ -529,9 +553,10 @@ Build AI, agent, MCP, and context workflows with clear guardrails.
 
 ### Roadmap
 - Existing skills: all listed above.
-- Missing skills: `mcp-server`, `tool-design`, `structured-outputs`,
-  `rag`, `evals`, `agent-memory`, `prompt-enhancement`,
-  `intent-classifier`, `ambiguity-resolution`.
+- Planned skills: `mcp-server`, `tool-design`, `structured-outputs`,
+  `agent-memory`, `prompt-enhancement`, `intent-classifier`,
+  `ambiguity-resolution`.
+- Concepts / technologies: `rag`, `evals`.
 - Priority: Alta.
 - Complexity: Alta.
 
@@ -584,8 +609,8 @@ Protect data, permissions, secrets, file operations, dependencies, and agent beh
 
 ### Roadmap
 - Existing skills: all listed above.
-- Missing skills: `oauth`, `rbac`, `file-safety`, `webhook-security`,
-  `tenant-isolation`.
+- Planned skills: `file-safety`, `webhook-security`.
+- Concepts / technologies: `oauth`, `rbac`, `tenant-isolation`.
 - Priority: Alta.
 - Complexity: Alta.
 
@@ -598,9 +623,9 @@ completion.
 ### Responsibilities
 - Test selection.
 - Smoke checks.
-- Regression checks.
 - Debug verification.
-- Final risk review.
+- Verification evidence.
+- Skipped-check disclosure.
 
 ### Skills
 - `testing`
@@ -620,14 +645,17 @@ completion.
 - `testing` owns what to run.
 - `code-review` owns final risk review.
 - `debugging` owns failure investigation.
+- `regression-review` is a Quality skill; it assesses regression readiness
+  after `testing` evidence exists instead of choosing the test command.
 - Do not claim checks passed unless they ran.
 - Quality review skills may request evidence from `testing`, but do not decide
   the test command.
 
 ### Roadmap
 - Existing skills: all listed above.
-- Missing skills: `pytest`, `playwright`, `contract-tests`, `smoke-tests`,
-  `ci-diagnostics`.
+- Planned skills: `ci-diagnostics`.
+- Concepts / technologies: `pytest`, `playwright`, `contract-tests`,
+  `smoke-tests`.
 - Priority: Alta.
 - Complexity: Media.
 
@@ -682,14 +710,15 @@ considered complete.
   implementation guidance.
 - `dependency-review` checks dependency readiness; `dependency-audit` owns
   dependency investigation and implementation guidance.
-- `release-readiness` runs last and summarizes required gate status.
+- `release-readiness` runs only for approval, handoff, release, packaging, or
+  deployment readiness and summarizes required gate status.
 - Use only gates relevant to the change. Do not load every quality skill by
   default.
 
 ### Roadmap
 - Existing skills: all listed above.
 - Existing governance docs: `QUALITY_GATES.md`.
-- Missing skills: `ci-quality-gates`, `risk-scoring`, `quality-reporting`.
+- Planned skills: `ci-quality-gates`, `risk-scoring`, `quality-reporting`.
 - Priority: Alta.
 - Complexity: Media.
 
@@ -729,8 +758,8 @@ Keep delivery, deployment, Git, and packaging repeatable and low risk.
 
 ### Roadmap
 - Existing skills: all listed above.
-- Missing skills: `github-actions`, `docker`, `release-notes`, `env-config`,
-  `rollback`, `observability`.
+- Concepts / technologies: `github-actions`, `docker`, `release-notes`,
+  `env-config`, `rollback`, `observability`.
 - Priority: Media.
 - Complexity: Media.
 
@@ -773,8 +802,9 @@ Keep project, skill, and operational documentation concise and useful.
 - Existing skills: `document-system`, `automation-scripts`.
 - Existing governance docs: `PROJECT_STATE.md`, `DECISIONS.md`,
   `VERSIONING.md`, `CONTRIBUTING.md`.
-- Missing skills: `documentation`, `skill-authoring`, `changelog`,
-  `runbooks`, `user-guides`, `api-docs`.
+- Planned skills: `documentation`, `skill-authoring`.
+- Concepts / technologies: `changelog`, `runbooks`, `user-guides`,
+  `api-docs`.
 - Priority: Media.
 - Complexity: Baixa.
 
@@ -791,13 +821,13 @@ Keep project, skill, and operational documentation concise and useful.
 - Keep `PROJECT_PROFILES.md` as profile-level defaults.
 
 ### Phase 5.3: Fill High-Priority Gaps
-- Backend: `rest-api`, `pydantic`, `webhooks`.
-- Frontend: `react`, `forms`, `tables`.
-- Database: `postgres`.
-- Business: `school-system`, `billing`, `audit-log`.
-- AI: `mcp-server`, `structured-outputs`, `evals`.
-- Security: `rbac`, `tenant-isolation`, `webhook-security`.
-- Testing: `pytest`, `playwright`, `contract-tests`.
+- Planned skill candidates: `rest-api`, `webhooks`, `charts`,
+  `data-import`, `backup-restore`, `school-system`, `billing`, `audit-log`,
+  `mcp-server`, `structured-outputs`, `webhook-security`,
+  `ci-diagnostics`.
+- Concepts / technologies to evaluate before turning into skills: `pydantic`,
+  `react`, `forms`, `tables`, `postgres`, `evals`, `rbac`,
+  `tenant-isolation`, `pytest`, `playwright`, `contract-tests`.
 
 ### Phase 5.4: Scale To 100+ Skills
 - Keep modules as stable top-level groups.

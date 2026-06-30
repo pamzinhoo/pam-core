@@ -5,6 +5,17 @@ subjective, mixed, or high-risk prompts, run Prompt Intelligence before
 `skill-orchestrator`.
 Load the smallest set that covers the task.
 
+## Scope
+This file is an operational map for existing skills only. Every value in table
+columns named `Skill`, `Lead Skill`, or `Cooperates With` must match a physical
+directory under `skills/`.
+
+Roadmap items, concepts, technologies, test types, project domains, and
+framework names belong in `MODULES.md` under Planned skills or Concepts /
+technologies. They should not appear here as dependencies, lead skills,
+cooperating skills, ownership rules, or trigger rules unless a matching skill
+directory exists.
+
 ## Priority Levels
 - Critical: must load when the task matches.
 - High: load for most relevant implementation work.
@@ -26,8 +37,9 @@ Load the smallest set that covers the task.
 8. Implementation specialists: language, framework, database, scripts.
 9. Verification: `testing`.
 10. Quality gates: matching review skills from `QUALITY_GATES.md`.
-11. Finish: `code-review`, `release-readiness`, `git` when version control is
-   requested.
+11. Finish: `code-review`; add `release-readiness` only for approval, handoff,
+   release, packaging, or deployment readiness, and `git` only when version
+   control is requested.
 
 ## Core Dependencies
 | Skill | Priority | Required With | Optional With |
@@ -67,7 +79,7 @@ Load the smallest set that covers the task.
 | documentation-review | Medium | Documentation Gate | document-system, automation-scripts |
 | regression-review | High | changed contracts, shared behavior | change-impact-analysis, testing |
 | dependency-review | Medium | dependency or lockfile changes | dependency-audit, security-review |
-| release-readiness | High | Release Gate before approval handoff | testing, code-review |
+| release-readiness | High | Release Gate before approval, handoff, release, packaging, or deployment readiness | testing, code-review |
 
 ## Cooperation Map
 | Area | Lead Skill | Cooperates With |
@@ -93,7 +105,6 @@ Load the smallest set that covers the task.
 | Prompt gap analysis | prompt-gap-analysis | security, scope-control, testing |
 | Task extraction | task-extraction | task-planning, scope-control, skill-orchestrator |
 | Success criteria | success-criteria | testing, ux-review, code-review |
-| Quality gates | release-readiness | architecture-review, security-review, performance-review, maintainability-review, documentation-review, ux-review, regression-review, dependency-review, testing, code-review |
 | Architecture Gate | architecture-review | architecture, refactoring, change-impact-analysis |
 | Maintainability Gate | maintainability-review | ponytail, refactoring, scope-control |
 | Security Gate | security-review | security, secrets-management, permissions-authorization, data-privacy |
@@ -101,6 +112,7 @@ Load the smallest set that covers the task.
 | Documentation Gate | documentation-review | document-system, automation-scripts, security-review |
 | UX Gate | ux-review | accessibility-review, ui-designer, ux, accessibility |
 | Regression readiness | regression-review | change-impact-analysis, testing, code-review |
+| Release Gate | release-readiness | testing, code-review, documentation-review, security-review, regression-review, dependency-review |
 | Backend API | fastapi | api-design, authentication, security, database-design |
 | FastAPI authentication | fastapi-authentication | authentication, permissions-authorization, security |
 | FastAPI dependencies | fastapi-dependencies | fastapi, sqlalchemy, transactions |
@@ -184,13 +196,22 @@ Load the smallest set that covers the task.
 - `regression-review` owns regression readiness assessment.
 - `dependency-review` owns dependency readiness assessment.
 - `release-readiness` owns Release Gate assessment.
+- Review skills do not implement fixes, choose verification commands, or replace
+  `code-review`; they consume implementation context and `testing` evidence to
+  report pass, fail, or residual risk.
 - `architecture` owns structure.
 - Domain skills own business meaning.
 - Language and framework skills own implementation details.
-- Backend specialist skills own narrow FastAPI and Python implementation
-  concerns when their exact trigger is present.
-- Database specialist skills own ORM, migration, query, and transaction
-  concerns when persistence behavior is touched.
+- `python` owns general Python implementation style; `async-python`,
+  `python-error-handling`, `python-logging`, `python-packaging`, and
+  `python-performance` cooperate only when their exact concern is being changed.
+- `fastapi` owns general FastAPI endpoint work; FastAPI specialist skills
+  cooperate only for authentication, dependency, validation, background task, or
+  WebSocket concerns at the FastAPI boundary.
+- `database-design` owns relational modeling; `sqlite`, `sqlalchemy`,
+  `alembic`, `database-migrations`, `query-optimization`, and `transactions`
+  cooperate only for their storage engine, ORM, migration, performance, or
+  consistency concern.
 - Frontend specialist skills own narrow UI patterns when their exact trigger is
   present; they do not replace `ui-designer`, `html-css`, `javascript`, `ux`,
   `accessibility`, or `anti-ai-ui`.

@@ -53,6 +53,161 @@ function Get-CooperationNames {
   return $names
 }
 
+function Get-ClassifiedBacktickNames {
+  param([string]$Text)
+
+  $names = New-Object System.Collections.Generic.HashSet[string]([System.StringComparer]::Ordinal)
+  $insideClassifiedListItem = $false
+
+  foreach ($line in ($Text -split "`r?`n")) {
+    if ($line -match '^\s*-\s*(Planned skills?|Planned skill candidates|Concepts / technologies(?:[^:]*)?|Existing governance docs):') {
+      $insideClassifiedListItem = $true
+      foreach ($reference in (Get-BacktickNames $line)) {
+        [void]$names.Add($reference)
+      }
+      continue
+    }
+
+    if ($insideClassifiedListItem -and $line -match '^\s{2,}\S') {
+      foreach ($reference in (Get-BacktickNames $line)) {
+        [void]$names.Add($reference)
+      }
+      continue
+    }
+
+    $insideClassifiedListItem = $false
+  }
+
+  return $names
+}
+
+function Get-ClassifiedBacktickNamesByKind {
+  param(
+    [string]$Text,
+    [string]$Kind
+  )
+
+  $names = New-Object System.Collections.Generic.HashSet[string]([System.StringComparer]::Ordinal)
+  $insideMatchingListItem = $false
+  $plannedPattern = '^\s*-\s*(Planned skills?|Planned skill candidates):'
+  $conceptPattern = '^\s*-\s*(Concepts / technologies(?:[^:]*)?):'
+  $pattern = $plannedPattern
+  if ($Kind -eq "Concept") {
+    $pattern = $conceptPattern
+  }
+
+  foreach ($line in ($Text -split "`r?`n")) {
+    if ($line -match $pattern) {
+      $insideMatchingListItem = $true
+      foreach ($reference in (Get-BacktickNames $line)) {
+        [void]$names.Add($reference)
+      }
+      continue
+    }
+
+    if ($insideMatchingListItem -and $line -match '^\s{2,}\S') {
+      foreach ($reference in (Get-BacktickNames $line)) {
+        [void]$names.Add($reference)
+      }
+      continue
+    }
+
+    $insideMatchingListItem = $false
+  }
+
+  return $names
+}
+
+function Format-AuditList {
+  param([string[]]$Values)
+
+  if (-not $Values -or $Values.Count -eq 0) {
+    return "- None"
+  }
+
+  return (($Values | Sort-Object -Unique | ForEach-Object { "- $_" }) -join "`n")
+}
+
+function Write-AuditReport {
+  param(
+    [string]$PluginRoot,
+    [int]$PhysicalSkillCount,
+    [int]$SkillsWithSkillMdCount,
+    [string[]]$SkillsMissingSkillMd,
+    [string[]]$DependencyRepresentedSkills,
+    [string[]]$MissingReferences,
+    [string[]]$PlannedReferences,
+    [string[]]$ConceptReferences,
+    [string[]]$InspectedFiles,
+    [string]$ClaudeValidationStatus,
+    [string[]]$InstallExcludedWarnings
+  )
+
+  $reportPath = Join-Path $PluginRoot "docs\audit-report.md"
+  $generatedAt = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss zzz")
+  $lines = @(
+    "# pam-core Audit Report",
+    "",
+    "- Generated at: $generatedAt",
+    "- Validation status: passed",
+    "- Claude validation status: $ClaudeValidationStatus",
+    "",
+    "## Skill Inventory",
+    "",
+    "- Physical skill directories: $PhysicalSkillCount",
+    "- Skill directories with SKILL.md: $SkillsWithSkillMdCount",
+    "- Skills represented in SKILL_DEPENDENCIES.md: $($DependencyRepresentedSkills.Count)",
+    "",
+    "## Skills Missing SKILL.md",
+    "",
+    (Format-AuditList $SkillsMissingSkillMd),
+    "",
+    "## Missing References",
+    "",
+    (Format-AuditList $MissingReferences),
+    "",
+    "## Accepted Planned Skills",
+    "",
+    (Format-AuditList $PlannedReferences),
+    "",
+    "## Accepted Concepts / Technologies",
+    "",
+    (Format-AuditList $ConceptReferences),
+    "",
+    "## Central Files Inspected",
+    "",
+    (Format-AuditList $InspectedFiles),
+    "",
+    "## Install-Excluded Directory Warnings",
+    "",
+    (Format-AuditList $InstallExcludedWarnings),
+    "",
+    "## Automatically Validated",
+    "",
+    "- Required root files exist.",
+    "- Critical text files are UTF-8 without BOM.",
+    "- Codex plugin manifest is valid and points to ./skills/.",
+    "- Every physical skill directory has valid SKILL.md frontmatter.",
+    "- Every SKILL.md contains required headings in the expected order.",
+    "- Cooperates With references point to physical skills.",
+    "- MODULES.md current Skills sections match physical skills.",
+    "- Central backticked references are existing skills, planned skills, concepts / technologies, or known non-skill references.",
+    "- SKILL_DEPENDENCIES.md operational table columns reference physical skills only.",
+    "- Every physical skill is represented in SKILL_DEPENDENCIES.md.",
+    "- Empty files are rejected.",
+    "- Marketplace files are UTF-8 without BOM when present.",
+    "- Claude integration validation passed."
+  )
+
+  $docsPath = Join-Path $PluginRoot "docs"
+  if (-not (Test-Path -LiteralPath $docsPath)) {
+    [void](New-Item -ItemType Directory -Path $docsPath)
+  }
+
+  $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+  [System.IO.File]::WriteAllText($reportPath, (($lines -join "`n") + "`n"), $utf8NoBom)
+}
+
 $criticalRootFiles = @(
   "AGENTS.md",
   "README.md",
@@ -163,11 +318,15 @@ foreach ($skillDir in $skillDirs) {
   [void]$skillNames.Add($skillDir.Name)
 }
 
+$skillsMissingSkillMd = New-Object System.Collections.Generic.List[string]
+$skillsWithSkillMdCount = 0
 foreach ($skillDir in $skillDirs) {
   $skillPath = Join-Path $skillDir.FullName "SKILL.md"
   if (-not (Test-Path -LiteralPath $skillPath)) {
+    $skillsMissingSkillMd.Add($skillDir.Name)
     throw "Missing SKILL.md in $($skillDir.FullName)"
   }
+  $skillsWithSkillMdCount++
   if (Test-HasBom $skillPath) {
     throw "SKILL.md must be UTF-8 without BOM: $skillPath"
   }
@@ -220,6 +379,10 @@ foreach ($skillDir in $skillDirs) {
 
 $modulesPath = Join-Path $PluginRoot "MODULES.md"
 $modulesText = Get-Content -Raw -LiteralPath $modulesPath
+$plannedReferences = Get-ClassifiedBacktickNamesByKind $modulesText "Planned"
+$conceptReferences = Get-ClassifiedBacktickNamesByKind $modulesText "Concept"
+$plannedReferences = @($plannedReferences | Where-Object { -not $skillNames.Contains($_) })
+$conceptReferences = @($conceptReferences | Where-Object { -not $skillNames.Contains($_) })
 $moduleSkillNames = New-Object System.Collections.Generic.HashSet[string]([System.StringComparer]::Ordinal)
 $insideSkillsSection = $false
 foreach ($line in ($modulesText -split "`r?`n")) {
@@ -252,6 +415,7 @@ $knownNonSkillReferences = New-Object System.Collections.Generic.HashSet[string]
 @(
   "argparse",
   "click",
+  "pam-core",
   "pydantic",
   "pytest",
   "typer",
@@ -259,19 +423,84 @@ $knownNonSkillReferences = New-Object System.Collections.Generic.HashSet[string]
 ) | ForEach-Object { [void]$knownNonSkillReferences.Add($_) }
 
 $docsToCheck = @(
+  "MODULES.md",
   "SKILL_DEPENDENCIES.md",
+  "QUALITY_GATES.md",
+  "AGENTS.md",
+  "CLAUDE.md",
   "PROJECT_PROFILES.md",
-  "QUALITY_GATES.md"
+  "scripts\validate.ps1"
 )
+$missingReferences = New-Object System.Collections.Generic.List[string]
 foreach ($relativePath in $docsToCheck) {
   $path = Join-Path $PluginRoot $relativePath
   $text = Get-Content -Raw -LiteralPath $path
+  $classifiedNonSkills = Get-ClassifiedBacktickNames $text
   foreach ($reference in (Get-BacktickNames $text)) {
-    if ($skillNames.Contains($reference) -or $knownNonSkillReferences.Contains($reference)) {
+    if ($skillNames.Contains($reference) -or
+        $knownNonSkillReferences.Contains($reference) -or
+        $classifiedNonSkills.Contains($reference)) {
       continue
     }
-    throw "$relativePath references missing skill or unknown backticked name: $reference"
+    $missingReferences.Add("$relativePath -> $reference")
+    throw "$relativePath references unclassified backticked name that looks like a skill but does not exist in skills/: $reference. Move it under Planned skills or Concepts / technologies, or add it to known non-skill references if it is a legitimate command, file, project, or technology."
   }
+}
+
+$skillDependenciesPath = Join-Path $PluginRoot "SKILL_DEPENDENCIES.md"
+$skillDependenciesLines = Get-Content -LiteralPath $skillDependenciesPath
+$tableHeaders = @()
+$insideMarkdownTable = $false
+foreach ($line in $skillDependenciesLines) {
+  if ($line -match '^\|(.+)\|$') {
+    $cells = @($line.Trim("|") -split "\|" | ForEach-Object { $_.Trim() })
+    $isSeparator = $true
+    foreach ($cell in $cells) {
+      if ($cell -notmatch '^:?-{3,}:?$') {
+        $isSeparator = $false
+        break
+      }
+    }
+    if ($isSeparator) {
+      continue
+    }
+
+    if (-not $insideMarkdownTable) {
+      $tableHeaders = $cells
+      $insideMarkdownTable = $true
+      continue
+    }
+
+    for ($i = 0; $i -lt $cells.Count; $i++) {
+      $header = $tableHeaders[$i]
+      if ($header -notin @("Skill", "Lead Skill", "Cooperates With")) {
+        continue
+      }
+
+      foreach ($part in ($cells[$i] -split ",")) {
+        $candidate = $part.Trim()
+        if (-not $candidate) {
+          continue
+        }
+        if (-not $skillNames.Contains($candidate)) {
+          throw "SKILL_DEPENDENCIES.md table column '$header' references missing physical skill: $candidate"
+        }
+      }
+    }
+    continue
+  }
+
+  $insideMarkdownTable = $false
+  $tableHeaders = @()
+}
+
+$skillDependenciesText = Get-Content -Raw -LiteralPath $skillDependenciesPath
+$dependencyRepresentedSkills = New-Object System.Collections.Generic.List[string]
+foreach ($skillName in $skillNames) {
+  if ($skillDependenciesText -notmatch "(^|[^a-z0-9-])$([regex]::Escape($skillName))([^a-z0-9-]|$)") {
+    throw "Physical skill is missing from SKILL_DEPENDENCIES.md: $skillName"
+  }
+  $dependencyRepresentedSkills.Add($skillName)
 }
 
 $emptyFiles = Get-ChildItem -LiteralPath $PluginRoot -Force -Recurse -File |
@@ -291,6 +520,7 @@ foreach ($marketplacePath in $marketplacePaths) {
 }
 
 $forbiddenDirs = @(".git", ".agents", ".codex", ".cache", ".tmp", "node_modules", "__pycache__", ".pytest_cache", ".mypy_cache", ".ruff_cache")
+$installExcludedWarnings = New-Object System.Collections.Generic.List[string]
 foreach ($dirName in $forbiddenDirs) {
   $matches = Get-ChildItem -LiteralPath $PluginRoot -Force -Recurse -Directory -ErrorAction SilentlyContinue |
     Where-Object { $_.Name -eq $dirName }
@@ -301,14 +531,42 @@ foreach ($dirName in $forbiddenDirs) {
       $relativePath = $relativePath.Substring($PluginRoot.Length).TrimStart("\", "/")
     }
     if ($childCount -eq 0) {
-      Write-Warning "Install-excluded directory is empty: $relativePath. It will not be copied by install-windows.ps1; remove it manually if it is leftover local state."
+      $warning = "Install-excluded directory is empty: $relativePath. It will not be copied by install-windows.ps1; remove it manually if it is leftover local state."
+      $installExcludedWarnings.Add($warning)
+      Write-Warning $warning
     } else {
-      Write-Warning "Install-excluded directory is present: $relativePath ($childCount item(s)). It will not be copied by install-windows.ps1; keep it only if it is intentional local state."
+      $warning = "Install-excluded directory is present: $relativePath ($childCount item(s)). It will not be copied by install-windows.ps1; keep it only if it is intentional local state."
+      $installExcludedWarnings.Add($warning)
+      Write-Warning $warning
     }
   }
 }
 
 $claudeValidationPath = Join-Path $PluginRoot "scripts\validate-claude.ps1"
 & $claudeValidationPath -PluginRoot $PluginRoot
+$claudeValidationStatus = "passed"
+
+$inspectedFiles = @(
+  $criticalTextFiles +
+  $docsToCheck +
+  @(
+    "skills\*\SKILL.md",
+    "docs\INSTALL_CLAUDE.md",
+    "docs\MULTI_AGENT_COMPATIBILITY.md"
+  )
+) | Sort-Object -Unique
+
+Write-AuditReport `
+  -PluginRoot $PluginRoot `
+  -PhysicalSkillCount $skillDirs.Count `
+  -SkillsWithSkillMdCount $skillsWithSkillMdCount `
+  -SkillsMissingSkillMd @($skillsMissingSkillMd) `
+  -DependencyRepresentedSkills @($dependencyRepresentedSkills) `
+  -MissingReferences @($missingReferences) `
+  -PlannedReferences @($plannedReferences) `
+  -ConceptReferences @($conceptReferences) `
+  -InspectedFiles @($inspectedFiles) `
+  -ClaudeValidationStatus $claudeValidationStatus `
+  -InstallExcludedWarnings @($installExcludedWarnings)
 
 Write-Host "pam-core validation passed: $PluginRoot"

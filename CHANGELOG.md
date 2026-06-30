@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+- Phase 14: normalize skill references across governance docs so physical
+  skills, planned skills, and concepts / technologies are classified
+  explicitly.
+- Keep `SKILL_DEPENDENCIES.md` as an operational map for existing physical
+  skills only, with roadmap and technology references classified in
+  `MODULES.md`.
+- Harden `scripts/validate.ps1` to reject unclassified missing skill-like
+  references and verify `SKILL_DEPENDENCIES.md` against the physical skill
+  inventory.
+- Generate `docs/audit-report.md` during validation, including skill inventory,
+  accepted planned skills, accepted concepts / technologies, and install
+  exclusion warnings.
+- Validate the post-install state across checkout, local package, and Codex
+  cache: 93 skills, 117 compared files after install exclusions, and zero
+  missing files, extra files, or content diffs.
+- Confirm `.git` and `.agents` are not distributed, while `docs/audit-report.md`
+  is present in both the local package and Codex cache.
 - Phase 13 base: add initial multi-agent compatibility with one shared core and
   thin adapters.
 - Add `CLAUDE.md` and `.claude-plugin/plugin.json` as the initial Claude Code

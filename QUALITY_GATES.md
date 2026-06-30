@@ -8,6 +8,18 @@ Use only the gates that match the change. A small documentation edit may need
 Documentation and Release gates only. A security-sensitive API change may need
 all gates.
 
+## Operating Boundaries
+
+- Implementation skills make or guide changes; review skills only assess gate
+  pass/fail status, risk, or readiness.
+- `testing` owns verification command selection, execution evidence, and skipped
+  check disclosure.
+- `code-review` owns the final general risk review after implementation,
+  verification, and relevant gates.
+- `release-readiness` owns only approval, handoff, release, packaging, or
+  deployment readiness. Do not use it as a replacement for `testing`,
+  `code-review`, or individual gate review skills.
+
 ## Architecture Gate
 
 ### Objective
@@ -204,9 +216,9 @@ destructive UI actions, and any user-visible workflow.
 Confirm the change is ready for user approval, handoff, release, or deployment.
 
 ### When To Run
-Run before considering relevant work complete, especially for deployable
-changes, packaging, plugin updates, migrations, user-visible behavior, or
-approval handoff.
+Run when the task is being handed off for approval or treated as release-ready,
+especially for deployable changes, packaging, plugin updates, migrations,
+user-visible behavior, or operational changes.
 
 ### Approval Criteria
 - Required gates have known pass/fail status.

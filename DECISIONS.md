@@ -92,3 +92,15 @@ Permanent decision log for `pam-core`.
 - Impact: Do not duplicate `skills/` for agent-specific formats. Codex remains
   on `AGENTS.md` and `.codex-plugin/plugin.json`; Claude Code starts with
   `CLAUDE.md` and `.claude-plugin/plugin.json`.
+
+## DEC-011
+- Date: 2026-06-30
+- Context: Governance docs need to mention physical skills, future skill ideas,
+  and technologies without making validation ambiguous.
+- Decision: Keep `SKILL_DEPENDENCIES.md` as an operational map of existing
+  physical skills only. Keep roadmap skills, technologies, and conceptual
+  references classified in `MODULES.md`.
+- Motive: Validation should be able to distinguish real skill dependencies from
+  future work and non-skill concepts.
+- Impact: References to missing skill-like names are accepted only when they are
+  explicitly classified as Planned skills or Concepts / technologies.
