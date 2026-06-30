@@ -4,12 +4,12 @@ Long-term state for `pam-core`.
 
 ## Current Version
 - Manifest version: `1.2.0`
-- Governance state: Phase 13 base partially complete
-- Last updated: 2026-06-29
+- Governance state: Phase 13 validation partially complete
+- Last updated: 2026-06-30
 - Release status: Phase 13 workspace changes prepared; plugin reinstall not run.
 
 ## Current Phase
-Phase 13 base partially complete: Multi-Agent Compatibility.
+Phase 13 validation partially complete: Multi-Agent Compatibility.
 
 This phase starts the shared-core, thin-adapter architecture so `pam-core` can
 be reused by multiple agents without duplicating skills. Codex remains supported
@@ -41,6 +41,8 @@ duplicate `skills/`, or change existing skill behavior.
 - Phase 10 Backend, Frontend, Database, Security, Quality, and supporting skill
   expansion.
 - Phase 11 audit cleanup for release preparation.
+- Claude adapter structural validation through `scripts/validate-claude.ps1`,
+  called by `scripts/validate.ps1`.
 
 ## Existing Modules
 - Core
@@ -201,7 +203,8 @@ duplicate `skills/`, or change existing skill behavior.
 - Phase 12: Added Prompt Intelligence foundation skills, Execution Control
   skills, and routing documentation for version 1.2.
 - Phase 13: Added the initial multi-agent compatibility base with a Claude Code
-  adapter and documentation while keeping the existing Codex adapter intact.
+  adapter, documentation, and Claude-specific structural validation while
+  keeping the existing Codex adapter intact.
 
 ## Roadmap
 - Keep `SKILL_DEPENDENCIES.md`, `PROJECT_PROFILES.md`, and `MODULES.md`
@@ -264,8 +267,8 @@ duplicate `skills/`, or change existing skill behavior.
 - Add roadmap skills only in future phases; do not add them as part of Phase 12.
 - Create the future `result-verification` or `post-action-verification` skill;
   do not create it until explicitly approved.
-- Add Claude-specific validation and installation automation only after manual
-  Claude Code adapter usage is verified.
+- Add Claude installation automation only after manual Claude Code adapter usage
+  is verified.
 
 ## Known Problems
 - The installed plugin cache may lag behind the workspace until reinstall.
@@ -278,5 +281,4 @@ duplicate `skills/`, or change existing skill behavior.
 
 ## Next Phase
 - Verify Claude Code adapter loading manually, then decide whether to add
-  Claude validation or installation automation. Keep plugin reinstall separate
-  and explicit.
+  Claude installation automation. Keep plugin reinstall separate and explicit.

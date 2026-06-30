@@ -90,6 +90,7 @@ $criticalTextFiles = @(
   "CHANGELOG.md",
   "scripts\install-windows.ps1",
   "scripts\uninstall-windows.ps1",
+  "scripts\validate-claude.ps1",
   "scripts\validate.ps1"
 )
 foreach ($relativePath in $criticalTextFiles) {
@@ -306,5 +307,8 @@ foreach ($dirName in $forbiddenDirs) {
     }
   }
 }
+
+$claudeValidationPath = Join-Path $PluginRoot "scripts\validate-claude.ps1"
+& $claudeValidationPath -PluginRoot $PluginRoot
 
 Write-Host "pam-core validation passed: $PluginRoot"

@@ -48,6 +48,15 @@ Claude Code support starts with a minimal adapter:
 The Claude adapter does not install itself automatically and does not copy
 skills.
 
+Validate the Claude adapter with:
+
+```powershell
+.\scripts\validate-claude.ps1
+```
+
+The main `.\scripts\validate.ps1` command keeps the Codex package checks and
+runs the Claude adapter validation at the end.
+
 ## Generic Mode
 
 Agents without native plugin or skill support can still use `pam-core` by
@@ -64,7 +73,8 @@ manually.
 ## Current Limitations
 
 - Claude Code installation is documented but not automated.
-- `scripts/validate.ps1` still validates the current Codex package contract.
+- `scripts/validate.ps1` validates the current Codex package contract first,
+  then runs the Claude adapter validation.
 - The Claude plugin manifest is minimal and may need expansion after practical
   Claude Code testing.
 - `README.md` still keeps the Codex workflow as the main installation path.
@@ -72,8 +82,6 @@ manually.
 
 ## Future Work
 
-- Add Claude-specific validation after testing the final expected manifest
-  schema.
 - Decide whether generic adapters need generated bundles or only docs.
 - Add adapter install scripts only after manual usage is proven.
 - Keep any future adapter metadata thin and pointed at the shared core.

@@ -27,6 +27,7 @@ noise, and boring maintainable code. It is intentionally project-agnostic.
 - `scripts/install-windows.ps1` - Windows installer for the personal Codex marketplace.
 - `scripts/uninstall-windows.ps1` - Windows uninstaller for the local plugin copy.
 - `scripts/validate.ps1` - local manifest and skill sanity checks.
+- `scripts/validate-claude.ps1` - local Claude adapter sanity checks.
 - `CHANGELOG.md` - release notes.
 
 ## Multi-Agent Support
@@ -132,6 +133,13 @@ codex.cmd --version
 
 The expected Codex CLI version for this release is `0.142.3`.
 
+Claude adapter validation is included at the end of `.\scripts\validate.ps1` and
+can also be run directly without Claude Code installed:
+
+```powershell
+.\scripts\validate-claude.ps1
+```
+
 Validation checks that:
 
 - `.codex-plugin/plugin.json` is valid JSON and UTF-8 without BOM.
@@ -140,6 +148,8 @@ Validation checks that:
 - Each `SKILL.md` starts with frontmatter containing `name` and `description`.
 - No source file is empty.
 - Any local `marketplace.json` is UTF-8 without BOM.
+- The Claude adapter files exist, use valid JSON, point to the shared `skills/`
+  core, and do not duplicate skills under `.claude/skills`.
 
 ## Uninstall on Windows
 

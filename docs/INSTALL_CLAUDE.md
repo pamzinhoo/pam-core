@@ -31,9 +31,25 @@ installation and marketplace references in `AGENTS.md` apply only to Codex.
 
 - There is no Claude install script yet.
 - The Claude manifest is intentionally minimal.
-- The existing validation script is still centered on the Codex package
-  contract.
+- Claude validation checks the adapter files and shared-core references, but it
+  does not verify Claude Code runtime loading.
 - Practical Claude Code plugin loading still needs manual verification.
+
+## Validate
+
+Claude adapter validation is local and does not require Claude Code to be
+installed. It does not install, copy, or delete anything.
+
+```powershell
+.\scripts\validate-claude.ps1
+```
+
+The main validation script also runs the Claude adapter check after completing
+the existing Codex package checks:
+
+```powershell
+.\scripts\validate.ps1
+```
 
 ## Updating
 

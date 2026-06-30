@@ -6,6 +6,8 @@
   thin adapters.
 - Add `CLAUDE.md` and `.claude-plugin/plugin.json` as the initial Claude Code
   adapter.
+- Add `scripts/validate-claude.ps1` and run it from `scripts/validate.ps1`
+  after the existing Codex package checks.
 - Add multi-agent, Codex, Claude Code, and generic installation documentation.
 - Keep existing Codex adapter, install scripts, and `skills/` layout unchanged.
 
