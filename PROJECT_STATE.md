@@ -4,29 +4,24 @@ Long-term state for `pam-core`.
 
 ## Current Version
 - Manifest version: `1.2.0`
-- Governance state: Phase 12 complete
+- Governance state: Phase 13 base partially complete
 - Last updated: 2026-06-29
-- Release status: `1.2.0` prepared; plugin reinstall not run.
+- Release status: Phase 13 workspace changes prepared; plugin reinstall not run.
 
 ## Current Phase
-Phase 12 complete: Prompt Intelligence Foundation and Execution Control for
-version 1.2.
+Phase 13 base partially complete: Multi-Agent Compatibility.
 
-This phase added the first Prompt Intelligence layer so `pam-core` can
-understand vague prompts, normalize execution context, detect gaps, split mixed
-requests, and define success criteria before routing and execution. It does not
-implement Meta Orchestrator, UI Visual Review, or the broader version 2.0 skill
-roadmap.
+This phase starts the shared-core, thin-adapter architecture so `pam-core` can
+be reused by multiple agents without duplicating skills. Codex remains supported
+through the existing adapter. Claude Code has an initial adapter through
+`CLAUDE.md` and `.claude-plugin/plugin.json`.
 
-Execution Control was completed after a real long-running Working incident. It
-prevents silent stalled tools, broad patch loops, and mixed bug/security/CSS
-work from continuing without progress limits.
+The shared core remains `skills/`, `MODULES.md`, `SKILL_DEPENDENCIES.md`,
+`PROJECT_PROFILES.md`, `QUALITY_GATES.md`, `SKILL_GUIDELINES.md`, and
+`PROJECT_STATE.md`.
 
-Post-action verification was registered as a mandatory future improvement after
-an observed file-edit failure where an agent claimed a change was applied, but a
-final reread showed the target line was still unchanged. The corrective rule is:
-after any file change, command, installation, migration, or configuration
-change, the agent must verify the real result before saying the work is done.
+This phase does not reinstall the Codex plugin, automate Claude installation,
+duplicate `skills/`, or change existing skill behavior.
 
 ## Completed Functionality
 - Personal Codex plugin manifest in `.codex-plugin/plugin.json`.
@@ -205,6 +200,8 @@ change, the agent must verify the real result before saying the work is done.
   docs, and cleaned invalid source-tree metadata.
 - Phase 12: Added Prompt Intelligence foundation skills, Execution Control
   skills, and routing documentation for version 1.2.
+- Phase 13: Added the initial multi-agent compatibility base with a Claude Code
+  adapter and documentation while keeping the existing Codex adapter intact.
 
 ## Roadmap
 - Keep `SKILL_DEPENDENCIES.md`, `PROJECT_PROFILES.md`, and `MODULES.md`
@@ -222,6 +219,8 @@ change, the agent must verify the real result before saying the work is done.
   plugin format needs it.
 - Prepare a 2.0 architecture release only when routing and module metadata
   require an incompatible change.
+- Expand multi-agent adapters only through thin manifests, entrypoints, and
+  install docs unless a future phase explicitly approves generated exports.
 
 ## Important Architectural Decisions
 - Skills are grouped by module, not by project type.
@@ -248,6 +247,8 @@ change, the agent must verify the real result before saying the work is done.
   policy.
 - New or changed skills must follow `SKILL_GUIDELINES.md`.
 - Plugin reinstall happens only after explicit approval.
+- `pam-core` uses one shared core with thin agent adapters. Do not duplicate
+  `skills/` for Codex, Claude Code, or generic agents.
 
 ## Pending Work
 - Reinstall the plugin only after explicit approval.
@@ -263,13 +264,19 @@ change, the agent must verify the real result before saying the work is done.
 - Add roadmap skills only in future phases; do not add them as part of Phase 12.
 - Create the future `result-verification` or `post-action-verification` skill;
   do not create it until explicitly approved.
+- Add Claude-specific validation and installation automation only after manual
+  Claude Code adapter usage is verified.
 
 ## Known Problems
 - The installed plugin cache may lag behind the workspace until reinstall.
+- Claude Code plugin loading has not been manually verified in this phase.
+- The Claude plugin manifest is intentionally minimal and may need schema
+  expansion after practical testing.
 - `MODULES.md` intentionally lists future roadmap skills that do not exist yet.
 - This workspace may not be a Git repository after invalid source metadata is
   cleaned; release tracking should use the user's chosen version-control source.
 
 ## Next Phase
-- Decide the next approved roadmap item after release `1.2.0`; keep plugin
-  reinstall separate and explicit.
+- Verify Claude Code adapter loading manually, then decide whether to add
+  Claude validation or installation automation. Keep plugin reinstall separate
+  and explicit.

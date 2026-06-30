@@ -1,6 +1,6 @@
 # pam-core
 
-Reusable Codex CLI skill pack for practical project work across repositories.
+Reusable multi-agent skill pack for practical project work across repositories.
 
 The pack favors small working changes, security at trust boundaries, low context
 noise, and boring maintainable code. It is intentionally project-agnostic.
@@ -8,7 +8,9 @@ noise, and boring maintainable code. It is intentionally project-agnostic.
 ## Contents
 
 - `.codex-plugin/plugin.json` - Codex plugin manifest.
+- `.claude-plugin/plugin.json` - Claude Code plugin manifest.
 - `AGENTS.md` - default behavior for agents using this pack.
+- `CLAUDE.md` - Claude Code entrypoint for this pack.
 - `PROJECT_STATE.md` - current phase, modules, roadmap, and known issues.
 - `DECISIONS.md` - permanent architecture and governance decision log.
 - `VERSIONING.md` - release and compatibility policy.
@@ -18,10 +20,41 @@ noise, and boring maintainable code. It is intentionally project-agnostic.
 - `SKILL_DEPENDENCIES.md` - skill cooperation, priority, and conflict map.
 - `PROJECT_PROFILES.md` - project-type routing defaults.
 - `skills/` - reusable skills for coding, review, UI, security, data, docs, and deployment.
+- `docs/MULTI_AGENT_COMPATIBILITY.md` - shared-core and adapter model.
+- `docs/INSTALL_CODEX.md` - Codex installation notes.
+- `docs/INSTALL_CLAUDE.md` - Claude Code usage notes.
+- `docs/INSTALL_GENERIC.md` - documentation-only generic agent usage.
 - `scripts/install-windows.ps1` - Windows installer for the personal Codex marketplace.
 - `scripts/uninstall-windows.ps1` - Windows uninstaller for the local plugin copy.
 - `scripts/validate.ps1` - local manifest and skill sanity checks.
 - `CHANGELOG.md` - release notes.
+
+## Multi-Agent Support
+
+`pam-core` now uses a shared-core, thin-adapter model.
+
+The shared core is:
+
+- `skills/`
+- `MODULES.md`
+- `SKILL_DEPENDENCIES.md`
+- `PROJECT_PROFILES.md`
+- `QUALITY_GATES.md`
+- `SKILL_GUIDELINES.md`
+- `PROJECT_STATE.md`
+
+Codex continues to be supported through the existing `AGENTS.md`,
+`.codex-plugin/plugin.json`, and Windows marketplace scripts. Claude Code has
+an initial adapter through `CLAUDE.md` and `.claude-plugin/plugin.json`.
+Generic mode is documentation-only for agents that can read the shared core but
+do not have a native adapter.
+
+See:
+
+- `docs/MULTI_AGENT_COMPATIBILITY.md`
+- `docs/INSTALL_CODEX.md`
+- `docs/INSTALL_CLAUDE.md`
+- `docs/INSTALL_GENERIC.md`
 
 ## Governance
 

@@ -1,7 +1,7 @@
 # Versioning
 
-`pam-core` follows semantic versioning with practical rules for a Codex skill
-pack.
+`pam-core` follows semantic versioning with practical rules for a multi-agent
+skill pack.
 
 ## Version Lines
 - `1.x`: compatible improvements to skills, docs, routing, validation, and
@@ -26,6 +26,8 @@ Use a minor release for compatible additions:
 - new skills that follow existing standards;
 - new project profiles;
 - new module roadmap items;
+- new agent adapters that reuse the existing shared core without breaking
+  Codex behavior;
 - stronger validation that existing valid skills can pass with small updates;
 - new documentation that does not change architecture.
 
@@ -38,6 +40,8 @@ Use a major release for architecture or contract changes:
 - changed module ownership model;
 - changed orchestration order;
 - incompatible installer or manifest behavior;
+- agent adapter changes that require moving, copying, renaming, or rewriting
+  public skills;
 - removal or rename of public skills;
 - validation rules that require broad migration.
 

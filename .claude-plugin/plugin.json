@@ -1,0 +1,10 @@
+{
+  "name": "pam-core",
+  "version": "1.2.0",
+  "description": "Multi-agent skill framework for project understanding, orchestration, security and quality gates.",
+  "author": {
+    "name": "pam-core"
+  },
+  "license": "MIT",
+  "skills": "./skills/"
+}

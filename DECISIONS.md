@@ -80,3 +80,15 @@ Permanent decision log for `pam-core`.
   must require verification of the real result after any file change, command,
   installation, migration, or configuration change before the agent says the
   work is complete.
+
+## DEC-010
+- Date: 2026-06-29
+- Context: `pam-core` needs to be reusable by multiple agents, starting with
+  Codex and Claude Code, without breaking the current Codex installation.
+- Decision: Keep one shared core and expose it through thin agent adapters.
+- Motive: A single `skills/` directory and shared governance docs avoid drift
+  between agents while allowing each agent to keep its own manifest and
+  entrypoint.
+- Impact: Do not duplicate `skills/` for agent-specific formats. Codex remains
+  on `AGENTS.md` and `.codex-plugin/plugin.json`; Claude Code starts with
+  `CLAUDE.md` and `.claude-plugin/plugin.json`.

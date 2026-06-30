@@ -2,7 +2,12 @@
 
 ## Unreleased
 
-- No unreleased changes.
+- Phase 13 base: add initial multi-agent compatibility with one shared core and
+  thin adapters.
+- Add `CLAUDE.md` and `.claude-plugin/plugin.json` as the initial Claude Code
+  adapter.
+- Add multi-agent, Codex, Claude Code, and generic installation documentation.
+- Keep existing Codex adapter, install scripts, and `skills/` layout unchanged.
 
 ## 1.2.0 - 2026-06-29 (prepared)
 
