@@ -4,20 +4,23 @@ Long-term state for `pam-core`.
 
 ## Current Version
 - Manifest version: `1.2.0`
-- Governance state: Phase 14 complete
-- Last updated: 2026-06-30
-- Release status: Installed and validated through Codex local package and cache.
+- Governance state: Phase 17 implemented
+- Last updated: 2026-07-01
+- Release status: Versioned distribution packaging is implemented in checkout;
+  runtime status remains pending without real evidence.
 
 ## Current Phase
-Phase 14 complete: Final consistency registration and validation.
+Phase 17 implemented: Versioned Distribution Packages.
 
-This phase records the validated final state after consistency auditing,
-validation hardening, automatic audit report generation, installation, and
-post-install comparison across the checkout, local package, and Codex cache.
+This phase adds versioned zip and tar.gz package generation in `dist/`, package
+manifests, SHA256 checksums, package validation scripts, and packaging
+documentation. Packaging is separate from runtime installation; the Phase 15
+install scripts remain responsible for installing an extracted package into a
+target agent location.
 
 The shared core remains `skills/`, `MODULES.md`, `SKILL_DEPENDENCIES.md`,
 `PROJECT_PROFILES.md`, `QUALITY_GATES.md`, `SKILL_GUIDELINES.md`, and
-`PROJECT_STATE.md`. The physical skill inventory is 93 skills.
+`PROJECT_STATE.md`. The physical skill inventory remains 93 skills.
 
 This phase did not create or remove skills and did not change existing skill
 behavior.
@@ -46,6 +49,22 @@ behavior.
   cache with 93 physical skills and 117 compared files after install
   exclusions.
 - Automatic audit report generation in `docs/audit-report.md`.
+- Phase 15 Unix install layer: `scripts/install-unix.sh`,
+  `scripts/uninstall-unix.sh`, `scripts/validate-unix.sh`, and
+  `scripts/detect-agent.sh`.
+- Linux/macOS installation documentation in `docs/INSTALL_LINUX.md`,
+  `docs/INSTALL_MACOS.md`, and `docs/AGENT_COMPATIBILITY.md`.
+- Phase 16 runtime test documentation in `docs/runtime-tests/`.
+- Runtime compatibility matrix in `docs/AGENT_COMPATIBILITY.md` that separates
+  installation, automatic detection, file validation, and runtime confirmation.
+- Installed-target file smoke checker in `scripts/runtime-smoke-test.sh`.
+- Phase 16.1 runtime evidence tracking in
+  `docs/runtime-tests/RUNTIME_RESULTS.md` and
+  `docs/runtime-tests/EVIDENCE_TEMPLATE.md`.
+- Phase 17 versioned distribution packaging through
+  `scripts/package-release.ps1`, `scripts/package-release.sh`,
+  `scripts/validate-package.ps1`, `scripts/validate-package.sh`, and
+  `docs/PACKAGING.md`.
 
 ## Existing Modules
 - Core
@@ -211,6 +230,16 @@ behavior.
 - Phase 14: Normalized skill references into Existing, Planned, and Concepts /
   technologies; hardened validation; generated an audit report; and confirmed
   checkout, local package, and Codex cache consistency after installation.
+- Phase 15: Added Linux/macOS installation support for Claude Code, Codex CLI,
+  Codex App, and generic compatible agents through shell scripts, target
+  detection, install manifests, validation, and uninstall safeguards.
+- Phase 16: Added manual runtime compatibility test runbooks, shared smoke-test
+  prompts, a runtime compatibility matrix, and a file-presence smoke checker for
+  installed targets.
+- Phase 16.1: Added formal runtime evidence records and templates, and required
+  evidence before marking agent runtime support as `supported`.
+- Phase 17: Added versioned zip and tar.gz release packages, package manifests,
+  checksums, validation scripts, and packaging documentation.
 
 ## Roadmap
 - Keep `SKILL_DEPENDENCIES.md`, `PROJECT_PROFILES.md`, and `MODULES.md`
@@ -261,6 +290,17 @@ behavior.
 - `SKILL_DEPENDENCIES.md` is an operational map for existing physical skills
   only. Roadmap items, technologies, and concepts must be classified in
   `MODULES.md`.
+- Unix install support must remain a thin copy/install layer over the shared
+  core and must not generate agent-specific skill exports.
+- Runtime compatibility must be tracked separately from installation
+  compatibility. File validation cannot prove model behavior, and runtime
+  support should remain `pending` or `manual` until tested in the real agent.
+- Runtime evidence must be recorded in `docs/runtime-tests/RUNTIME_RESULTS.md`
+  before any compatibility matrix runtime status is changed to `supported`.
+- Release packages use an explicit allowlist and must not include `.git`,
+  `dist`, caches, logs, temporary files, or personal local artifacts.
+- Packaging creates clean archives only. It must not perform runtime
+  installation or mark runtime support as confirmed.
 
 ## Pending Work
 - Specify the future Meta Orchestrator before implementation. It should answer
@@ -274,15 +314,24 @@ behavior.
 - Add roadmap skills only in future phases; do not add them as part of Phase 12.
 - Create the future `result-verification` or `post-action-verification` skill;
   do not create it until explicitly approved.
-- Add Claude installation automation only after manual Claude Code adapter usage
-  is verified.
+- Manually run the Phase 16 runtime test runbooks for Claude Code, Codex CLI,
+  Codex App, and generic agents, record evidence in
+  `docs/runtime-tests/RUNTIME_RESULTS.md`, then update
+  `docs/AGENT_COMPATIBILITY.md` with confirmed runtime results.
 
 ## Known Problems
 - Claude Code plugin loading has not been manually verified in this phase.
 - The Claude plugin manifest is intentionally minimal and may need schema
   expansion after practical testing.
 - `MODULES.md` intentionally lists future roadmap skills that do not exist yet.
+- Unix scripts validate file layout and install manifests, but they do not
+  guarantee that each agent runtime reloads the installed pack automatically.
+- `scripts/runtime-smoke-test.sh` checks installed file presence only; it does
+  not validate AI behavior.
+- `docs/runtime-tests/RUNTIME_RESULTS.md` currently records no confirmed
+  runtime support for Claude Code, Codex CLI, or Codex App.
 
 ## Next Phase
-- Verify Claude Code adapter loading manually, then decide whether to add
-  Claude installation automation. Keep plugin reinstall separate and explicit.
+- Execute the Phase 16 runtime runbooks in real agent sessions, record evidence
+  with the Phase 16.1 template, and document any runtime-specific registration
+  or reload steps that are proven necessary.

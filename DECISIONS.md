@@ -104,3 +104,44 @@ Permanent decision log for `pam-core`.
   future work and non-skill concepts.
 - Impact: References to missing skill-like names are accepted only when they are
   explicitly classified as Planned skills or Concepts / technologies.
+
+## DEC-012
+- Date: 2026-07-01
+- Context: `pam-core` needs Linux/macOS installation support for Claude Code,
+  Codex CLI, Codex App, and generic compatible agents without changing the
+  shared skill architecture.
+- Decision: Add Unix install, validate, detect, and uninstall scripts as a thin
+  copy layer over the existing shared core.
+- Motive: Unix support should make local installation repeatable while avoiding
+  duplicated skills or agent-specific generated exports.
+- Impact: Unix targets are selected by conservative detection or explicit
+  `--target`; uninstall is allowed only when `.install-manifest.json` proves the
+  target was created by the Unix installer.
+
+## DEC-013
+- Date: 2026-07-01
+- Context: File installation and validation can prove that a `pam-core` target
+  contains the shared core, but they cannot prove that Claude Code, Codex CLI,
+  Codex App, or a generic agent actually loaded and followed it in a model
+  session.
+- Decision: Track runtime compatibility separately from installation
+  compatibility and require manual smoke-test evidence before marking runtime
+  support as confirmed.
+- Motive: Different agents load instructions, plugins, and local files through
+  different mechanisms. A script must not pretend to validate model behavior.
+- Impact: Runtime docs use explicit states such as `supported`, `partial`,
+  `manual`, `pending`, and `unknown`. `scripts/runtime-smoke-test.sh` checks
+  required files only; it does not test AI behavior.
+
+## DEC-014
+- Date: 2026-07-01
+- Context: `pam-core` needs distributable release archives that do not require a
+  full repository clone and do not leak local source-control or cache state.
+- Decision: Build release packages from an explicit allowlist, include
+  `PACKAGE_MANIFEST.json` in every archive, and write SHA256 checksums in
+  `dist/CHECKSUMS.txt`.
+- Motive: Distribution should be reproducible and clean while remaining
+  separate from runtime installation and runtime confirmation.
+- Impact: Packages must exclude `.git`, `dist`, caches, logs, temporary files,
+  and personal local artifacts. Package manifests keep
+  `runtime_status.runtime_pending` true until real runtime evidence is recorded.

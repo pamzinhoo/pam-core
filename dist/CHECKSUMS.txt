@@ -1,0 +1,2 @@
+3bce9a4ff71cb64b708e9e6fe676bdc1e0c23d3733f83de76dc907bb54b5c828 *pam-core-1.2.0.zip
+ca031fcf294e9db7ec8c24b406af88d73385a85cee5739d923da16221ef43937 *pam-core-1.2.0.tar.gz

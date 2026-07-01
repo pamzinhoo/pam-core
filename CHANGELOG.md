@@ -2,6 +2,36 @@
 
 ## Unreleased
 
+- Phase 17: add versioned distribution packaging for zip and tar.gz artifacts in
+  `dist/`, with package manifests, SHA256 checksums, and package validators.
+- Add `docs/PACKAGING.md` with Windows, Linux, and macOS packaging and
+  validation instructions.
+- Keep package runtime status honest with `runtime_pending: true` until real
+  runtime evidence is recorded.
+- Phase 16.1: add formal runtime evidence records with
+  `docs/runtime-tests/RUNTIME_RESULTS.md` and
+  `docs/runtime-tests/EVIDENCE_TEMPLATE.md`.
+- Require per-agent evidence before marking runtime support as `supported`, and
+  keep Claude Code, Codex CLI, Codex App, and generic runtime statuses pending
+  or manual until real sessions are recorded.
+- Extend runtime docs, Unix validation, and PowerShell validation to require the
+  runtime evidence files.
+- Phase 16: add runtime compatibility test runbooks for Claude Code, Codex CLI,
+  Codex App, and generic agents, plus shared smoke-test prompts.
+- Add a runtime compatibility matrix that separates installation, detection,
+  file validation, and real runtime confirmation states.
+- Add `scripts/runtime-smoke-test.sh` to verify that an installed target has the
+  files needed for a manual runtime smoke test without pretending to test AI
+  behavior.
+- Extend Unix and PowerShell validation to require the runtime test
+  documentation and smoke checker.
+- Phase 15: add Linux/macOS installation, validation, detection, and
+  manifest-guarded uninstall scripts for Claude Code, Codex CLI, Codex App, and
+  generic compatible agents.
+- Add Unix installation docs for Linux, macOS, and agent compatibility without
+  changing the shared `skills/` architecture or removing Windows scripts.
+- Extend Windows validation to check Unix script presence, LF line endings, and
+  documentation files without executing bash on Windows.
 - Phase 14: normalize skill references across governance docs so physical
   skills, planned skills, and concepts / technologies are classified
   explicitly.

@@ -15,6 +15,22 @@ function Test-HasBom {
   return $bytes.Length -ge 3 -and $bytes[0] -eq 0xEF -and $bytes[1] -eq 0xBB -and $bytes[2] -eq 0xBF
 }
 
+function Test-HasCrlf {
+  param([string]$Path)
+
+  if (-not (Test-Path -LiteralPath $Path)) {
+    return $false
+  }
+
+  $bytes = [System.IO.File]::ReadAllBytes($Path)
+  for ($i = 0; $i -lt ($bytes.Length - 1); $i++) {
+    if ($bytes[$i] -eq 0x0D -and $bytes[$i + 1] -eq 0x0A) {
+      return $true
+    }
+  }
+  return $false
+}
+
 function Get-BacktickNames {
   param([string]$Text)
 
@@ -196,6 +212,8 @@ function Write-AuditReport {
     "- Every physical skill is represented in SKILL_DEPENDENCIES.md.",
     "- Empty files are rejected.",
     "- Marketplace files are UTF-8 without BOM when present.",
+    "- Unix shell scripts exist, use bash shebangs, use set -euo pipefail, and use LF line endings.",
+    "- Runtime compatibility test documents exist.",
     "- Claude integration validation passed."
   )
 
@@ -220,7 +238,28 @@ $criticalRootFiles = @(
 )
 $requiredFiles = @(
   $criticalRootFiles +
-  "CHANGELOG.md"
+  "CHANGELOG.md" +
+  "docs\AGENT_COMPATIBILITY.md" +
+  "docs\PACKAGING.md" +
+  "docs\INSTALL_LINUX.md" +
+  "docs\INSTALL_MACOS.md" +
+  "docs\runtime-tests\README.md" +
+  "docs\runtime-tests\CLAUDE_CODE.md" +
+  "docs\runtime-tests\CODEX_CLI.md" +
+  "docs\runtime-tests\CODEX_APP.md" +
+  "docs\runtime-tests\GENERIC_AGENT.md" +
+  "docs\runtime-tests\SMOKE_TEST_PROMPTS.md" +
+  "docs\runtime-tests\EVIDENCE_TEMPLATE.md" +
+  "docs\runtime-tests\RUNTIME_RESULTS.md" +
+  "scripts\detect-agent.sh" +
+  "scripts\install-unix.sh" +
+  "scripts\uninstall-unix.sh" +
+  "scripts\package-release.ps1" +
+  "scripts\package-release.sh" +
+  "scripts\runtime-smoke-test.sh" +
+  "scripts\validate-package.ps1" +
+  "scripts\validate-package.sh" +
+  "scripts\validate-unix.sh"
 )
 foreach ($requiredFile in $requiredFiles) {
   $path = Join-Path $PluginRoot $requiredFile
@@ -244,14 +283,49 @@ $criticalTextFiles = @(
   "CONTRIBUTING.md",
   "CHANGELOG.md",
   "scripts\install-windows.ps1",
+  "scripts\detect-agent.sh",
+  "scripts\install-unix.sh",
+  "scripts\package-release.ps1",
+  "scripts\package-release.sh",
+  "scripts\runtime-smoke-test.sh",
   "scripts\uninstall-windows.ps1",
+  "scripts\uninstall-unix.sh",
   "scripts\validate-claude.ps1",
+  "scripts\validate-package.ps1",
+  "scripts\validate-package.sh",
+  "scripts\validate-unix.sh",
   "scripts\validate.ps1"
 )
 foreach ($relativePath in $criticalTextFiles) {
   $path = Join-Path $PluginRoot $relativePath
   if (Test-HasBom $path) {
     throw "Critical file must be UTF-8 without BOM: $path"
+  }
+}
+
+$unixShellScripts = @(
+  "scripts\detect-agent.sh",
+  "scripts\install-unix.sh",
+  "scripts\package-release.sh",
+  "scripts\runtime-smoke-test.sh",
+  "scripts\uninstall-unix.sh",
+  "scripts\validate-package.sh",
+  "scripts\validate-unix.sh"
+)
+foreach ($relativePath in $unixShellScripts) {
+  $path = Join-Path $PluginRoot $relativePath
+  if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
+    throw "Missing Unix shell script: $path"
+  }
+  if (Test-HasCrlf $path) {
+    throw "Unix shell script must use LF line endings: $path"
+  }
+  $content = Get-Content -Raw -LiteralPath $path
+  if ($content -notmatch '^#!/usr/bin/env bash\r?\n') {
+    throw "Unix shell script must start with bash shebang: $path"
+  }
+  if ($content -notmatch '(?m)^set -euo pipefail$') {
+    throw "Unix shell script must use set -euo pipefail: $path"
   }
 }
 
@@ -551,8 +625,20 @@ $inspectedFiles = @(
   $docsToCheck +
   @(
     "skills\*\SKILL.md",
+    "docs\AGENT_COMPATIBILITY.md",
     "docs\INSTALL_CLAUDE.md",
-    "docs\MULTI_AGENT_COMPATIBILITY.md"
+    "docs\INSTALL_LINUX.md",
+    "docs\INSTALL_MACOS.md",
+    "docs\MULTI_AGENT_COMPATIBILITY.md",
+    "docs\PACKAGING.md",
+    "docs\runtime-tests\README.md",
+    "docs\runtime-tests\CLAUDE_CODE.md",
+    "docs\runtime-tests\CODEX_CLI.md",
+    "docs\runtime-tests\CODEX_APP.md",
+    "docs\runtime-tests\GENERIC_AGENT.md",
+    "docs\runtime-tests\SMOKE_TEST_PROMPTS.md",
+    "docs\runtime-tests\EVIDENCE_TEMPLATE.md",
+    "docs\runtime-tests\RUNTIME_RESULTS.md"
   )
 ) | Sort-Object -Unique
 

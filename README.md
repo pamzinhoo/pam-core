@@ -21,11 +21,25 @@ noise, and boring maintainable code. It is intentionally project-agnostic.
 - `PROJECT_PROFILES.md` - project-type routing defaults.
 - `skills/` - reusable skills for coding, review, UI, security, data, docs, and deployment.
 - `docs/MULTI_AGENT_COMPATIBILITY.md` - shared-core and adapter model.
+- `docs/AGENT_COMPATIBILITY.md` - Unix agent target and compatibility notes.
 - `docs/INSTALL_CODEX.md` - Codex installation notes.
 - `docs/INSTALL_CLAUDE.md` - Claude Code usage notes.
 - `docs/INSTALL_GENERIC.md` - documentation-only generic agent usage.
+- `docs/INSTALL_LINUX.md` - Linux shell install, validate, and uninstall notes.
+- `docs/INSTALL_MACOS.md` - macOS shell install, validate, and uninstall notes.
+- `docs/PACKAGING.md` - versioned distribution package workflow.
+- `docs/runtime-tests/` - manual runtime compatibility runbooks, prompts, and evidence records.
 - `scripts/install-windows.ps1` - Windows installer for the personal Codex marketplace.
 - `scripts/uninstall-windows.ps1` - Windows uninstaller for the local plugin copy.
+- `scripts/install-unix.sh` - Linux/macOS installer for shared-core targets.
+- `scripts/uninstall-unix.sh` - Linux/macOS uninstaller guarded by the install manifest.
+- `scripts/validate-unix.sh` - Linux/macOS validation for shell scripts and installs.
+- `scripts/detect-agent.sh` - conservative Unix agent and target detection.
+- `scripts/runtime-smoke-test.sh` - installed-target file check for manual runtime tests.
+- `scripts/package-release.ps1` - Windows release package builder.
+- `scripts/package-release.sh` - Unix release package builder.
+- `scripts/validate-package.ps1` - Windows release package validator.
+- `scripts/validate-package.sh` - Unix release package validator.
 - `scripts/validate.ps1` - local manifest and skill sanity checks.
 - `scripts/validate-claude.ps1` - local Claude adapter sanity checks.
 - `CHANGELOG.md` - release notes.
@@ -53,9 +67,14 @@ do not have a native adapter.
 See:
 
 - `docs/MULTI_AGENT_COMPATIBILITY.md`
+- `docs/AGENT_COMPATIBILITY.md`
 - `docs/INSTALL_CODEX.md`
 - `docs/INSTALL_CLAUDE.md`
 - `docs/INSTALL_GENERIC.md`
+- `docs/INSTALL_LINUX.md`
+- `docs/INSTALL_MACOS.md`
+- `docs/PACKAGING.md`
+- `docs/runtime-tests/README.md`
 
 ## Governance
 
@@ -124,6 +143,58 @@ the same. It also excludes `.git`, `.agents`, `.codex`, `.cache`, `.tmp`,
 `node_modules`, common language caches, and temporary files from the installed
 plugin copy.
 
+## Install on Linux/macOS
+
+From this directory:
+
+```bash
+chmod +x scripts/*.sh
+bash scripts/validate-unix.sh
+bash scripts/install-unix.sh --agent auto
+```
+
+Install for a specific agent or manual target:
+
+```bash
+bash scripts/install-unix.sh --agent claude-code --force
+bash scripts/install-unix.sh --agent codex-cli --force
+bash scripts/install-unix.sh --agent codex-app --force
+bash scripts/install-unix.sh --agent generic --target /tmp/pam-core-test --force
+```
+
+Validate and uninstall a manual target:
+
+```bash
+bash scripts/validate-unix.sh --target /tmp/pam-core-test
+bash scripts/runtime-smoke-test.sh --target /tmp/pam-core-test
+bash scripts/uninstall-unix.sh --target /tmp/pam-core-test --dry-run
+bash scripts/uninstall-unix.sh --target /tmp/pam-core-test
+```
+
+See `docs/INSTALL_LINUX.md`, `docs/INSTALL_MACOS.md`, and
+`docs/AGENT_COMPATIBILITY.md` for target defaults and known limitations.
+
+## Package a Release
+
+Windows:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\package-release.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\validate-package.ps1
+```
+
+Linux/macOS:
+
+```bash
+bash scripts/package-release.sh
+bash scripts/validate-package.sh
+```
+
+Packages are written to `dist/` as `pam-core-VERSION.zip` and
+`pam-core-VERSION.tar.gz`, with SHA256 hashes in `dist/CHECKSUMS.txt`. See
+`docs/PACKAGING.md` for the allowlist, exclusions, and install-from-extracted
+package flow.
+
 ## Validate
 
 ```powershell
@@ -150,6 +221,9 @@ Validation checks that:
 - Any local `marketplace.json` is UTF-8 without BOM.
 - The Claude adapter files exist, use valid JSON, point to the shared `skills/`
   core, and do not duplicate skills under `.claude/skills`.
+- Runtime compatibility documents exist. Runtime behavior still requires the
+  manual prompts in `docs/runtime-tests/SMOKE_TEST_PROMPTS.md` and evidence in
+  `docs/runtime-tests/RUNTIME_RESULTS.md`.
 
 ## Uninstall on Windows
 
