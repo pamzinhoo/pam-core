@@ -1,6 +1,6 @@
 # pam-core Audit Report
 
-- Generated at: 2026-07-01 16:27:04 -03:00
+- Generated at: 2026-07-01 20:31:13 -03:00
 - Validation status: passed
 - Claude validation status: passed
 
@@ -95,8 +95,11 @@
 - docs\INSTALL_CLAUDE.md
 - docs\INSTALL_LINUX.md
 - docs\INSTALL_MACOS.md
+- docs\KNOWN_LIMITATIONS.md
+- docs\LINUX_TEST_PLAN.md
 - docs\MULTI_AGENT_COMPATIBILITY.md
 - docs\PACKAGING.md
+- docs\RELEASE_READINESS.md
 - docs\runtime-tests\CLAUDE_CODE.md
 - docs\runtime-tests\CODEX_APP.md
 - docs\runtime-tests\CODEX_CLI.md
@@ -105,6 +108,7 @@
 - docs\runtime-tests\README.md
 - docs\runtime-tests\RUNTIME_RESULTS.md
 - docs\runtime-tests\SMOKE_TEST_PROMPTS.md
+- docs\USAGE.md
 - MODULES.md
 - PROJECT_PROFILES.md
 - PROJECT_STATE.md
@@ -131,7 +135,7 @@
 ## Install-Excluded Directory Warnings
 
 - Install-excluded directory is empty: .agents. It will not be copied by install-windows.ps1; remove it manually if it is leftover local state.
-- Install-excluded directory is present: .git (470 item(s)). It will not be copied by install-windows.ps1; keep it only if it is intentional local state.
+- Install-excluded directory is present: .git (520 item(s)). It will not be copied by install-windows.ps1; keep it only if it is intentional local state.
 
 ## Automatically Validated
 

@@ -8,6 +8,7 @@ AGENT="auto"
 TARGET=""
 DRY_RUN=0
 FORCE=0
+CODEX_RUNTIME_CACHE=0
 
 REQUIRED_ITEMS=(
   "AGENTS.md"
@@ -27,6 +28,7 @@ OPTIONAL_COMMON_ITEMS=(
   "PROJECT_PROFILES.md"
   "QUALITY_GATES.md"
   "SKILL_GUIDELINES.md"
+  "docs/PACKAGING.md"
 )
 
 EXCLUDED_DIRS=(
@@ -61,6 +63,9 @@ Usage: scripts/install-unix.sh [options]
 Options:
   --agent claude-code|codex-cli|codex-app|generic|auto
   --target PATH       Override the resolved install target.
+  --codex-runtime-cache
+                      Explicitly install to the observed Codex CLI runtime
+                      cache target instead of the generic Codex CLI target.
   --dry-run           Show what would happen without writing files.
   --force             Replace an existing target after creating a backup.
   --help              Show this help.
@@ -91,6 +96,28 @@ detect_agent_line() {
   "$SCRIPT_DIR/detect-agent.sh"
 }
 
+read_version() {
+  if [ -f "$SOURCE_ROOT/VERSION" ]; then
+    local version
+    version="$(tr -d '[:space:]' < "$SOURCE_ROOT/VERSION")"
+    case "$version" in
+      [0-9]*.[0-9]*.[0-9]*) printf '%s\n' "$version"; return ;;
+      *) fail "VERSION exists but does not contain a simple semver value" ;;
+    esac
+  fi
+
+  if [ -f "$SOURCE_ROOT/VERSIONING.md" ]; then
+    local versioning_version
+    versioning_version="$(sed -n 's/^[[:space:]]*\(Current version\|Manifest version\|Version\):[[:space:]]*`\{0,1\}\([^`[:space:]]*\)`\{0,1\}[[:space:]]*$/\2/p' "$SOURCE_ROOT/VERSIONING.md" | head -n 1)"
+    if [ -n "$versioning_version" ]; then
+      printf '%s\n' "$versioning_version"
+      return
+    fi
+  fi
+
+  sed -n 's/^- Manifest version:[[:space:]]*`\{0,1\}\([^`[:space:]]*\)`\{0,1\}[[:space:]]*$/\1/p' "$SOURCE_ROOT/PROJECT_STATE.md" | head -n 1
+}
+
 agent_target() {
   local agent="$1"
   local os_name
@@ -117,6 +144,13 @@ agent_target() {
       fail "Unsupported agent: $agent"
       ;;
   esac
+}
+
+codex_runtime_cache_target() {
+  local version
+  version="$(read_version)"
+  [ -n "$version" ] || fail "Could not read pam-core version for Codex runtime cache target"
+  printf '%s/plugins/cache/personal/pam-core/%s\n' "${CODEX_HOME:-$HOME/.codex}" "$version"
 }
 
 copy_item() {
@@ -195,6 +229,11 @@ write_manifest() {
     printf '  "source": "%s",\n' "$(json_escape "$SOURCE_ROOT")"
     printf '  "os": "%s",\n' "$(json_escape "$os_name")"
     printf '  "installed_at": "%s",\n' "$installed_at"
+    if [ "$CODEX_RUNTIME_CACHE" -eq 1 ]; then
+      printf '  "runtime_cache_target": true,\n'
+    else
+      printf '  "runtime_cache_target": false,\n'
+    fi
     printf '  "managed_by": "scripts/install-unix.sh"\n'
     printf '}\n'
   } > "$manifest"
@@ -211,6 +250,10 @@ while [ "$#" -gt 0 ]; do
       [ "$#" -ge 2 ] || fail "--target requires a path"
       TARGET="$2"
       shift 2
+      ;;
+    --codex-runtime-cache)
+      CODEX_RUNTIME_CACHE=1
+      shift
       ;;
     --dry-run)
       DRY_RUN=1
@@ -240,8 +283,17 @@ if [ "$AGENT" = "auto" ]; then
   AGENT="${detected_line%%	*}"
 fi
 
+if [ "$CODEX_RUNTIME_CACHE" -eq 1 ]; then
+  [ "$AGENT" = "codex-cli" ] || fail "--codex-runtime-cache is only supported for --agent codex-cli or auto-detected codex-cli"
+  [ -z "$TARGET" ] || fail "--codex-runtime-cache cannot be combined with --target; use one explicit target mode"
+fi
+
 if [ -z "$TARGET" ]; then
-  TARGET="$(agent_target "$AGENT")"
+  if [ "$CODEX_RUNTIME_CACHE" -eq 1 ]; then
+    TARGET="$(codex_runtime_cache_target)"
+  else
+    TARGET="$(agent_target "$AGENT")"
+  fi
 fi
 
 case "$TARGET" in
@@ -278,6 +330,10 @@ say "OS: $(uname -s)"
 say "Agent: $AGENT"
 say "Source: $SOURCE_ROOT"
 say "Target: $TARGET"
+if [ "$CODEX_RUNTIME_CACHE" -eq 1 ]; then
+  say "Runtime cache target: true"
+  say "Warning: installing to the observed Codex CLI runtime cache. This is explicit and may be overwritten by Codex internals."
+fi
 
 if [ "$DRY_RUN" -eq 1 ]; then
   say "Dry run: no files will be copied."
@@ -286,7 +342,13 @@ fi
 
 if [ -e "$TARGET" ]; then
   [ "$FORCE" -eq 1 ] || fail "Target already exists: $TARGET. Re-run with --force to replace it."
-  backup="${TARGET}.backup.$(date -u '+%Y%m%d%H%M%S')"
+  if [ "$CODEX_RUNTIME_CACHE" -eq 1 ]; then
+    backup_parent="$(dirname "$(dirname "$TARGET")")/pam-core-backups"
+    mkdir -p "$backup_parent"
+    backup="$backup_parent/$(basename "$TARGET").backup.$(date -u '+%Y%m%d%H%M%S')"
+  else
+    backup="${TARGET}.backup.$(date -u '+%Y%m%d%H%M%S')"
+  fi
   mv "$TARGET" "$backup"
   say "Existing target moved to backup: $backup"
 fi

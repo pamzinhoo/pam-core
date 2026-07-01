@@ -241,6 +241,10 @@ $requiredFiles = @(
   "CHANGELOG.md" +
   "docs\AGENT_COMPATIBILITY.md" +
   "docs\PACKAGING.md" +
+  "docs\USAGE.md" +
+  "docs\LINUX_TEST_PLAN.md" +
+  "docs\KNOWN_LIMITATIONS.md" +
+  "docs\RELEASE_READINESS.md" +
   "docs\INSTALL_LINUX.md" +
   "docs\INSTALL_MACOS.md" +
   "docs\runtime-tests\README.md" +
@@ -282,6 +286,10 @@ $criticalTextFiles = @(
   "VERSIONING.md",
   "CONTRIBUTING.md",
   "CHANGELOG.md",
+  "docs\USAGE.md",
+  "docs\LINUX_TEST_PLAN.md",
+  "docs\KNOWN_LIMITATIONS.md",
+  "docs\RELEASE_READINESS.md",
   "scripts\install-windows.ps1",
   "scripts\detect-agent.sh",
   "scripts\install-unix.sh",
@@ -326,6 +334,14 @@ foreach ($relativePath in $unixShellScripts) {
   }
   if ($content -notmatch '(?m)^set -euo pipefail$') {
     throw "Unix shell script must use set -euo pipefail: $path"
+  }
+}
+
+foreach ($relativePath in @("scripts\install-unix.sh", "scripts\uninstall-unix.sh")) {
+  $path = Join-Path $PluginRoot $relativePath
+  $content = Get-Content -Raw -LiteralPath $path
+  if ($content -notmatch '--codex-runtime-cache') {
+    throw "$relativePath must document and handle --codex-runtime-cache"
   }
 }
 
@@ -631,6 +647,10 @@ $inspectedFiles = @(
     "docs\INSTALL_MACOS.md",
     "docs\MULTI_AGENT_COMPATIBILITY.md",
     "docs\PACKAGING.md",
+    "docs\USAGE.md",
+    "docs\LINUX_TEST_PLAN.md",
+    "docs\KNOWN_LIMITATIONS.md",
+    "docs\RELEASE_READINESS.md",
     "docs\runtime-tests\README.md",
     "docs\runtime-tests\CLAUDE_CODE.md",
     "docs\runtime-tests\CODEX_CLI.md",

@@ -63,3 +63,6 @@ bash scripts/uninstall-unix.sh --target /tmp/pam-core-test
   the generic agent reading the installed files.
 - Detection is conservative and falls back to `generic` when no known
   environment or config directory is found.
+- Phase 19 did not run on Linux native or WSL because neither environment was
+  available on the validation host. Git Bash on Windows is tracked separately
+  and does not count as Linux native evidence.

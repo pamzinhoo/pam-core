@@ -76,3 +76,18 @@ show that Codex App:
 - Runtime loading is pending manual confirmation.
 - App-specific cache or plugin registration behavior may require additional
   steps after practical testing.
+
+## Phase 19 Discovery - 2026-07-01
+
+In the current Windows environment, no real Codex App session was observable:
+
+- `codex.cmd --version` reported Codex CLI `0.142.5`.
+- Existing Codex paths were CLI/cache paths: `~/.codex`,
+  `~/.codex/plugins`, and `~/.codex/plugins/cache`.
+- `%APPDATA%\Codex`, `%LOCALAPPDATA%\Codex`, `~/.config/codex`, and
+  `~/.local/share/codex` were not found.
+- Running processes showed Codex CLI and command runner processes, but no
+  separate Codex App runtime session.
+
+Status remains `pending` until a real Codex App session can reload the
+installed target and pass `SMOKE_TEST_PROMPTS.md`.

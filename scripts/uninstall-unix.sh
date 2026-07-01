@@ -2,10 +2,12 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+ROOT="$(cd "$SCRIPT_DIR/.." && pwd -P)"
 
 AGENT="auto"
 TARGET=""
 DRY_RUN=0
+CODEX_RUNTIME_CACHE=0
 
 usage() {
   cat <<'EOF'
@@ -14,6 +16,9 @@ Usage: scripts/uninstall-unix.sh [options]
 Options:
   --agent claude-code|codex-cli|codex-app|generic|auto
   --target PATH       Override the resolved install target.
+  --codex-runtime-cache
+                      Explicitly uninstall the observed Codex CLI runtime
+                      cache target instead of the generic Codex CLI target.
   --dry-run           Show what would happen without deleting files.
   --help              Show this help.
 EOF
@@ -22,6 +27,28 @@ EOF
 fail() {
   printf 'ERROR: %s\n' "$*" >&2
   exit 1
+}
+
+read_version() {
+  if [ -f "$ROOT/VERSION" ]; then
+    local version
+    version="$(tr -d '[:space:]' < "$ROOT/VERSION")"
+    case "$version" in
+      [0-9]*.[0-9]*.[0-9]*) printf '%s\n' "$version"; return ;;
+      *) fail "VERSION exists but does not contain a simple semver value" ;;
+    esac
+  fi
+
+  if [ -f "$ROOT/VERSIONING.md" ]; then
+    local versioning_version
+    versioning_version="$(sed -n 's/^[[:space:]]*\(Current version\|Manifest version\|Version\):[[:space:]]*`\{0,1\}\([^`[:space:]]*\)`\{0,1\}[[:space:]]*$/\2/p' "$ROOT/VERSIONING.md" | head -n 1)"
+    if [ -n "$versioning_version" ]; then
+      printf '%s\n' "$versioning_version"
+      return
+    fi
+  fi
+
+  sed -n 's/^- Manifest version:[[:space:]]*`\{0,1\}\([^`[:space:]]*\)`\{0,1\}[[:space:]]*$/\1/p' "$ROOT/PROJECT_STATE.md" | head -n 1
 }
 
 agent_target() {
@@ -52,6 +79,13 @@ agent_target() {
   esac
 }
 
+codex_runtime_cache_target() {
+  local version
+  version="$(read_version)"
+  [ -n "$version" ] || fail "Could not read pam-core version for Codex runtime cache target"
+  printf '%s/plugins/cache/personal/pam-core/%s\n' "${CODEX_HOME:-$HOME/.codex}" "$version"
+}
+
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --agent)
@@ -63,6 +97,10 @@ while [ "$#" -gt 0 ]; do
       [ "$#" -ge 2 ] || fail "--target requires a path"
       TARGET="$2"
       shift 2
+      ;;
+    --codex-runtime-cache)
+      CODEX_RUNTIME_CACHE=1
+      shift
       ;;
     --dry-run)
       DRY_RUN=1
@@ -88,8 +126,17 @@ if [ "$AGENT" = "auto" ] && [ -z "$TARGET" ]; then
   AGENT="${detected_line%%	*}"
 fi
 
+if [ "$CODEX_RUNTIME_CACHE" -eq 1 ]; then
+  [ "$AGENT" = "codex-cli" ] || fail "--codex-runtime-cache is only supported for --agent codex-cli or auto-detected codex-cli"
+  [ -z "$TARGET" ] || fail "--codex-runtime-cache cannot be combined with --target; use one explicit target mode"
+fi
+
 if [ -z "$TARGET" ]; then
-  TARGET="$(agent_target "$AGENT")"
+  if [ "$CODEX_RUNTIME_CACHE" -eq 1 ]; then
+    TARGET="$(codex_runtime_cache_target)"
+  else
+    TARGET="$(agent_target "$AGENT")"
+  fi
 fi
 
 case "$TARGET" in
@@ -115,6 +162,9 @@ manifest="$TARGET/.install-manifest.json"
 printf 'pam-core Unix uninstall\n'
 printf 'Agent: %s\n' "$AGENT"
 printf 'Target: %s\n' "$TARGET"
+if [ "$CODEX_RUNTIME_CACHE" -eq 1 ]; then
+  printf 'Runtime cache target: true\n'
+fi
 
 if [ ! -d "$TARGET" ]; then
   fail "Target does not exist: $TARGET"
@@ -130,6 +180,10 @@ fi
 
 if ! grep -q '"managed_by"[[:space:]]*:[[:space:]]*"scripts/install-unix.sh"' "$manifest"; then
   fail "Manifest was not created by scripts/install-unix.sh: $manifest"
+fi
+
+if [ "$CODEX_RUNTIME_CACHE" -eq 1 ] && ! grep -q '"runtime_cache_target"[[:space:]]*:[[:space:]]*true' "$manifest"; then
+  fail "Refusing runtime cache uninstall without runtime_cache_target=true in manifest: $manifest"
 fi
 
 if [ "$DRY_RUN" -eq 1 ]; then

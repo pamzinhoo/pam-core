@@ -4,19 +4,140 @@ Long-term state for `pam-core`.
 
 ## Current Version
 - Manifest version: `1.2.0`
-- Governance state: Phase 17 implemented
+- Governance state: Phase 20 completed
 - Last updated: 2026-07-01
 - Release status: Versioned distribution packaging is implemented in checkout;
-  runtime status remains pending without real evidence.
+  Bash packaging validation passed under Git Bash. Phase 20 consolidated usage,
+  release readiness, known limitations, and the Linux test plan. Codex CLI is
+  supported through the explicit runtime cache adapter, and global runtime
+  status remains pending for Claude Code, Codex App, and native OS validation
+  not available in this environment.
 
 ## Current Phase
-Phase 17 implemented: Versioned Distribution Packages.
+Phase 20 completed: Release Readiness, Usage Guide, and Final Git Sync.
 
-This phase adds versioned zip and tar.gz package generation in `dist/`, package
+Phase 20 added release-facing documentation without changing skills or module
+architecture:
+
+- `docs/USAGE.md`
+- `docs/LINUX_TEST_PLAN.md`
+- `docs/KNOWN_LIMITATIONS.md`
+- `docs/RELEASE_READINESS.md`
+
+These docs consolidate install, validation, package, uninstall, Linux test, and
+runtime evidence rules for the current 1.2.0 release candidate. They explicitly
+keep Codex CLI `supported` only through `--codex-runtime-cache`; Claude Code,
+Codex App, WSL, Linux native, and macOS native remain `pending`; generic agents
+remain `manual`; and global `runtime_pending` remains true.
+
+Phase 19 completed: Native OS and Remaining Agent Verification.
+
+On 2026-07-01, Phase 19 rechecked the Phase 18.2 Codex CLI runtime cache
+adapter and confirmed that `scripts/install-unix.sh`,
+`scripts/uninstall-unix.sh`, and `scripts/validate-unix.sh` still protect the
+explicit `--codex-runtime-cache` mode. Codex CLI remains `supported` only for
+the explicit runtime cache adapter. The generic Unix target
+`~/.codex/plugins/pam-core` remains unproven as a runtime source.
+
+Claude Code discovery found `C:\Users\joaov\.claude` and
+`C:\Users\joaov\.claude\plugins`, but no `claude` or `claude.cmd` command in
+PowerShell or Git Bash. No real Claude Code runtime session could be run, so
+Claude Code remains `pending`.
+
+Codex App discovery found existing Codex CLI/cache directories under
+`C:\Users\joaov\.codex`, but no `%APPDATA%\Codex`, `%LOCALAPPDATA%\Codex`,
+Linux-style app config directory, or observable Codex App session. Codex App
+remains `pending`.
+
+The available Unix-like shell was Git Bash on Windows, reporting
+`MINGW64_NT-10.0-26200`. WSL was not installed, `sw_vers` was unavailable, and
+no Linux native or macOS native environment was present. Native Linux, WSL, and
+macOS validation remain `pending` with environment limitation recorded in
+`docs/runtime-tests/RUNTIME_RESULTS.md`. Git Bash validation is recorded
+separately and must not be treated as Linux native evidence.
+
+Global `runtime_pending` remains true because Claude Code, Codex App, and
+native OS validation are still pending.
+
+Phase 18.2 completed: Codex CLI Install Adapter.
+
+Phase 18.2 added an explicit `--codex-runtime-cache` mode to the Unix installer
+and uninstaller. This mode installs only when requested, only for Codex CLI, and
+resolves to the observed runtime cache target:
+
+`C:\Users\joaov\.codex\plugins\cache\personal\pam-core\1.2.0`
+
+The installer writes `.install-manifest.json` with
+`"runtime_cache_target": true`, and `runtime-smoke-test.sh` reports that marker.
+Runtime cache backups are placed outside the active `personal/pam-core/`
+directory under `personal/pam-core-backups/` because Codex CLI inspected an
+adjacent backup directory during testing.
+
+On 2026-07-01, Codex CLI `0.142.5` read the Phase 18.2 sentinel from the
+explicit cache target:
+
+`C:\Users\joaov\.codex\plugins\cache\personal\pam-core\1.2.0\RUNTIME_SENTINEL.md`
+
+with content `CODEX_RUNTIME_SENTINEL_PHASE_18_2_CACHE_TARGET`. The main runtime
+prompts passed, with one focused FastAPI routing retest. Codex CLI is now
+`supported` for the explicit runtime cache adapter only. The generic Unix
+target `~/.codex/plugins/pam-core` is still not proven as a runtime source.
+
+The sentinel was removed after testing. The previous cache backup was preserved
+at:
+
+`C:\Users\joaov\.codex\plugins\cache\personal\pam-core-backups\1.2.0.backup.20260701224602`
+
+Global `runtime_pending` remains true because Claude Code and Codex App are
+still pending.
+
+Phase 18.1 completed: Codex CLI Source-of-Truth Verification.
+
+On 2026-07-01, Codex CLI source-of-truth probes showed that the observed runtime
+loads `pam-core` from the Codex personal plugin cache
+`C:\Users\joaov\.codex\plugins\cache\personal\pam-core\1.2.0`, not from the
+Phase 15 Unix target `C:\Users\joaov\.codex\plugins\pam-core`.
+
+A target-only `RUNTIME_SENTINEL.md` was not found by Codex CLI, did not appear
+in the cache before or after a runtime session, and the cache was not recreated
+from the target when renamed. With the target renamed away and cache restored,
+Codex CLI still recognized `pam-core` and read entrypoints from the cache. The
+target and cache were restored, the sentinel was removed, and no Phase 18.1
+backup directories were left behind.
+
+Codex CLI remains `partial`: real runtime behavior is confirmed through the
+personal plugin cache, but the Unix target path is not proven as a runtime
+source.
+
+Phase 18 started: Real Agent Runtime Verification.
+
+On 2026-07-01, Codex CLI `0.142.5` was tested in a fresh non-interactive
+runtime session on Windows with Git Bash available. The Unix-style Codex CLI
+target `/c/Users/joaov/.codex/plugins/pam-core` was installed, validated, and
+passed the file smoke test. The real runtime session recognized `pam-core`,
+used `AGENTS.md`, `MODULES.md`, and `SKILL_DEPENDENCIES.md`, avoided creating
+new skills, and did not hallucinate the planned `result-verification` skill.
+
+The Codex CLI result is recorded as `partial` because the observed runtime
+loaded `pam-core` from the Codex personal plugin cache
+`C:\Users\joaov\.codex\plugins\cache\personal\pam-core\1.2.0`, not from the
+newly installed Unix target. Claude Code was not available on PATH in this
+environment, and no Codex App runtime session was observed.
+
+Phase 17.1 validated: Native Package Validation.
+
+Phase 17 added versioned zip and tar.gz package generation in `dist/`, package
 manifests, SHA256 checksums, package validation scripts, and packaging
 documentation. Packaging is separate from runtime installation; the Phase 15
 install scripts remain responsible for installing an extracted package into a
 target agent location.
+
+Phase 17.1 validated the Bash packaging path under Git Bash on 2026-07-01:
+`validate-unix.sh`, `package-release.sh`, `validate-package.sh`, and
+`git diff --check` passed. The generated Bash packages matched the PowerShell
+package path on allowlist, manifest fields, required files, exclusions,
+checksums, and `runtime_pending: true`. WSL was not installed in this
+environment, and no separate native Linux or macOS host run was recorded.
 
 The shared core remains `skills/`, `MODULES.md`, `SKILL_DEPENDENCIES.md`,
 `PROJECT_PROFILES.md`, `QUALITY_GATES.md`, `SKILL_GUIDELINES.md`, and
@@ -65,6 +186,21 @@ behavior.
   `scripts/package-release.ps1`, `scripts/package-release.sh`,
   `scripts/validate-package.ps1`, `scripts/validate-package.sh`, and
   `docs/PACKAGING.md`.
+- Phase 17.1 Bash package validation under Git Bash, including Unix validation,
+  package generation, package validation, checksum verification, and
+  PowerShell/Bash content equivalence for required package criteria.
+- Phase 18 started real runtime verification and recorded partial Codex CLI
+  evidence in `docs/runtime-tests/RUNTIME_RESULTS.md`.
+- Phase 18.1 verified the Codex CLI runtime source of truth: the observed
+  source is the personal plugin cache, not the Phase 15 Unix target.
+- Phase 18.2 added and validated an explicit Codex CLI runtime cache adapter,
+  promoting Codex CLI to supported for that adapter only.
+- Phase 19 verified remaining runtime status honestly: Claude Code command not
+  available, Codex App session not observable, WSL/Linux/macOS native
+  validation not available, and Git Bash kept separate from Linux native.
+- Phase 20 added usage, Linux test plan, known limitations, and release
+  readiness docs for the 1.2.0 release candidate without changing skills or
+  architecture.
 
 ## Existing Modules
 - Core
@@ -240,6 +376,16 @@ behavior.
   evidence before marking agent runtime support as `supported`.
 - Phase 17: Added versioned zip and tar.gz release packages, package manifests,
   checksums, validation scripts, and packaging documentation.
+- Phase 17.1: Validated the Bash packaging path under Git Bash and confirmed
+  generated packages keep runtime support pending. WSL was not installed, and
+  no separate native Linux or macOS host run was recorded.
+- Phase 19: Rechecked Codex CLI cache-adapter support, discovered Claude Code
+  and Codex App availability in the current Windows environment, recorded
+  native OS validation as pending because WSL/Linux/macOS were unavailable, and
+  kept global `runtime_pending` true.
+- Phase 20: Consolidated release readiness, usage, known limitations, and the
+  Linux native test plan. Release remains evidence-scoped with
+  `runtime_pending` true.
 
 ## Roadmap
 - Keep `SKILL_DEPENDENCIES.md`, `PROJECT_PROFILES.md`, and `MODULES.md`
@@ -314,24 +460,30 @@ behavior.
 - Add roadmap skills only in future phases; do not add them as part of Phase 12.
 - Create the future `result-verification` or `post-action-verification` skill;
   do not create it until explicitly approved.
-- Manually run the Phase 16 runtime test runbooks for Claude Code, Codex CLI,
-  Codex App, and generic agents, record evidence in
-  `docs/runtime-tests/RUNTIME_RESULTS.md`, then update
-  `docs/AGENT_COMPATIBILITY.md` with confirmed runtime results.
+- Continue real runtime verification for Claude Code and Codex App, and run
+  Linux/WSL/macOS native validation on matching hosts. Update
+  `docs/AGENT_COMPATIBILITY.md` only with confirmed evidence.
+- Use `docs/LINUX_TEST_PLAN.md` for the next real Linux validation run.
 
 ## Known Problems
-- Claude Code plugin loading has not been manually verified in this phase.
+- Claude Code plugin loading has not been manually verified in this phase;
+  `claude` was not available on PATH in the 2026-07-01 test environment.
 - The Claude plugin manifest is intentionally minimal and may need schema
   expansion after practical testing.
 - `MODULES.md` intentionally lists future roadmap skills that do not exist yet.
 - Unix scripts validate file layout and install manifests, but they do not
   guarantee that each agent runtime reloads the installed pack automatically.
+- Phase 17.1 Bash package validation was run under Git Bash on Windows; a
+  separate WSL, Linux, or macOS host validation has not been recorded.
 - `scripts/runtime-smoke-test.sh` checks installed file presence only; it does
   not validate AI behavior.
-- `docs/runtime-tests/RUNTIME_RESULTS.md` currently records no confirmed
-  runtime support for Claude Code, Codex CLI, or Codex App.
+- `docs/runtime-tests/RUNTIME_RESULTS.md` records supported Codex CLI runtime
+  evidence for the explicit cache adapter only. Claude Code and Codex App still
+  have no confirmed runtime support.
+- Phase 19 found Git Bash on Windows but no WSL, Linux native, or macOS native
+  environment. Native OS validation remains pending.
 
 ## Next Phase
-- Execute the Phase 16 runtime runbooks in real agent sessions, record evidence
-  with the Phase 16.1 template, and document any runtime-specific registration
-  or reload steps that are proven necessary.
+- Run the Claude Code and Codex App runtime runbooks in real agent sessions.
+- Run the native validation sequence on WSL, Linux native, or macOS native hosts
+  and record the evidence before changing those statuses.

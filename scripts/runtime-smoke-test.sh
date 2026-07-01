@@ -53,6 +53,7 @@ check_target_file "AGENTS.md"
 check_target_file "MODULES.md"
 check_target_file "SKILL_DEPENDENCIES.md"
 check_target_file "PROJECT_STATE.md"
+check_target_file ".install-manifest.json"
 [ -d "$TARGET/skills" ] || fail "Target is missing skills directory"
 
 check_source_file "docs/runtime-tests/README.md"
@@ -64,4 +65,9 @@ check_source_file "docs/runtime-tests/SMOKE_TEST_PROMPTS.md"
 check_source_file "docs/runtime-tests/EVIDENCE_TEMPLATE.md"
 check_source_file "docs/runtime-tests/RUNTIME_RESULTS.md"
 
+if grep -q '"runtime_cache_target"[[:space:]]*:[[:space:]]*true' "$TARGET/.install-manifest.json"; then
+  printf 'Runtime cache target: true\n'
+else
+  printf 'Runtime cache target: false\n'
+fi
 printf 'pam-core runtime smoke file check passed: %s\n' "$TARGET"

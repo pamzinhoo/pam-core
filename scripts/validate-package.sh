@@ -27,6 +27,10 @@ REQUIRED_PATHS=(
   "docs/INSTALL_MACOS.md"
   "docs/AGENT_COMPATIBILITY.md"
   "docs/PACKAGING.md"
+  "docs/USAGE.md"
+  "docs/LINUX_TEST_PLAN.md"
+  "docs/KNOWN_LIMITATIONS.md"
+  "docs/RELEASE_READINESS.md"
   "docs/runtime-tests/"
 )
 
@@ -38,6 +42,8 @@ FORBIDDEN_PATTERNS=(
   '(^|/)cache(/|$)'
   '(^|/)node_modules(/|$)'
   '(^|/)__pycache__(/|$)'
+  '(^|/)\.pytest_cache(/|$)'
+  '(^|/)\.mypy_cache(/|$)'
   '\.bak$'
   '\.tmp$'
   '(^|/)\.DS_Store$'
@@ -57,7 +63,25 @@ fail() {
   exit 1
 }
 
-version_from_project_state() {
+read_version() {
+  if [ -f "$ROOT/VERSION" ]; then
+    local version
+    version="$(tr -d '[:space:]' < "$ROOT/VERSION")"
+    case "$version" in
+      [0-9]*.[0-9]*.[0-9]*) printf '%s\n' "$version"; return ;;
+      *) fail "VERSION exists but does not contain a simple semver value" ;;
+    esac
+  fi
+
+  if [ -f "$ROOT/VERSIONING.md" ]; then
+    local versioning_version
+    versioning_version="$(sed -n 's/^[[:space:]]*\(Current version\|Manifest version\|Version\):[[:space:]]*`\{0,1\}\([^`[:space:]]*\)`\{0,1\}[[:space:]]*$/\2/p' "$ROOT/VERSIONING.md" | head -n 1)"
+    if [ -n "$versioning_version" ]; then
+      printf '%s\n' "$versioning_version"
+      return
+    fi
+  fi
+
   sed -n 's/^- Manifest version:[[:space:]]*`\{0,1\}\([^`[:space:]]*\)`\{0,1\}[[:space:]]*$/\1/p' "$ROOT/PROJECT_STATE.md" | head -n 1
 }
 
@@ -105,8 +129,10 @@ extract_and_check_manifest() {
   temp="$(mktemp -d)"
   if [ "$format" = "zip" ]; then
     command -v unzip >/dev/null 2>&1 || fail "unzip is required to inspect zip packages"
-    unzip_status=0
-    unzip -q "$archive" -d "$temp" || unzip_status=$?
+    unzip -q "$archive" -d "$temp" || {
+      rm -rf "$temp"
+      fail "unzip failed while extracting manifest from $archive"
+    }
   else
     tar -xzf "$archive" -C "$temp"
   fi
@@ -122,7 +148,7 @@ extract_and_check_manifest() {
   grep -q "\"package_format\"[[:space:]]*:[[:space:]]*\"$format\"" "$manifest" ||
     fail "Manifest package_format must be $format in $archive"
   grep -q '"runtime_pending"[[:space:]]*:[[:space:]]*true' "$manifest" ||
-    fail "Manifest runtime_status.runtime_pending must be true while runtime is unconfirmed"
+    fail "Manifest runtime_pending must be true while runtime is unconfirmed"
   rm -rf "$temp"
 }
 
@@ -139,7 +165,7 @@ while [ "$#" -gt 0 ]; do
 done
 
 [ -d "$DIST" ] || fail "dist directory does not exist: $DIST"
-VERSION="$(version_from_project_state)"
+VERSION="$(read_version)"
 [ -n "$VERSION" ] || fail "Could not read version from PROJECT_STATE.md"
 
 ZIP_PATH="$DIST/pam-core-$VERSION.zip"
@@ -170,5 +196,13 @@ extract_and_check_manifest "$TAR_PATH" "tar.gz"
 
 grep -q "pam-core-$VERSION.zip" "$CHECKSUMS" || fail "CHECKSUMS.txt is missing zip package"
 grep -q "pam-core-$VERSION.tar.gz" "$CHECKSUMS" || fail "CHECKSUMS.txt is missing tar.gz package"
+
+if command -v sha256sum >/dev/null 2>&1; then
+  (cd "$DIST" && sha256sum -c CHECKSUMS.txt)
+elif command -v shasum >/dev/null 2>&1; then
+  (cd "$DIST" && shasum -a 256 -c CHECKSUMS.txt)
+else
+  fail "sha256sum or shasum is required to validate CHECKSUMS.txt"
+fi
 
 printf 'pam-core package validation passed: %s\n' "$DIST"

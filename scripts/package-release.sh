@@ -28,6 +28,10 @@ INCLUDED_PATHS=(
   "docs/INSTALL_MACOS.md"
   "docs/AGENT_COMPATIBILITY.md"
   "docs/PACKAGING.md"
+  "docs/USAGE.md"
+  "docs/LINUX_TEST_PLAN.md"
+  "docs/KNOWN_LIMITATIONS.md"
+  "docs/RELEASE_READINESS.md"
   "docs/runtime-tests"
 )
 
@@ -41,6 +45,8 @@ EXCLUDED_PATTERNS=(
   "*.tmp"
   "node_modules/"
   "__pycache__/"
+  ".pytest_cache/"
+  ".mypy_cache/"
   ".DS_Store"
   "Thumbs.db"
 )
@@ -62,7 +68,25 @@ json_escape() {
   printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
 }
 
-version_from_project_state() {
+read_version() {
+  if [ -f "$ROOT/VERSION" ]; then
+    local version
+    version="$(tr -d '[:space:]' < "$ROOT/VERSION")"
+    case "$version" in
+      [0-9]*.[0-9]*.[0-9]*) printf '%s\n' "$version"; return ;;
+      *) fail "VERSION exists but does not contain a simple semver value" ;;
+    esac
+  fi
+
+  if [ -f "$ROOT/VERSIONING.md" ]; then
+    local versioning_version
+    versioning_version="$(sed -n 's/^[[:space:]]*\(Current version\|Manifest version\|Version\):[[:space:]]*`\{0,1\}\([^`[:space:]]*\)`\{0,1\}[[:space:]]*$/\2/p' "$ROOT/VERSIONING.md" | head -n 1)"
+    if [ -n "$versioning_version" ]; then
+      printf '%s\n' "$versioning_version"
+      return
+    fi
+  fi
+
   sed -n 's/^- Manifest version:[[:space:]]*`\{0,1\}\([^`[:space:]]*\)`\{0,1\}[[:space:]]*$/\1/p' "$ROOT/PROJECT_STATE.md" | head -n 1
 }
 
@@ -72,12 +96,16 @@ runtime_pending() {
     return
   fi
 
-  if grep -E '^\|[[:space:]]*(Claude Code|Codex CLI|Codex App|Generic agent)[[:space:]]*\|' "$ROOT/docs/runtime-tests/RUNTIME_RESULTS.md" |
-    grep -qE '\|[[:space:]]*supported[[:space:]]*\|'; then
-    printf 'false'
-  else
-    printf 'true'
-  fi
+  local agent
+  for agent in "Claude Code" "Codex CLI" "Codex App"; do
+    if ! grep -E "^\|[[:space:]]*$agent[[:space:]]*\|" "$ROOT/docs/runtime-tests/RUNTIME_RESULTS.md" |
+      grep -qE '\|[[:space:]]*supported[[:space:]]*\|'; then
+      printf 'true'
+      return
+    fi
+  done
+
+  printf 'false'
 }
 
 copy_item() {
@@ -125,10 +153,8 @@ write_manifest() {
       printf '  "source_commit": null,\n'
     fi
     printf '  "package_format": "%s",\n' "$format"
-    printf '  "runtime_status": {\n'
-    printf '    "runtime_pending": %s,\n' "$runtime_is_pending"
-    printf '    "evidence_file": "docs/runtime-tests/RUNTIME_RESULTS.md"\n'
-    printf '  },\n'
+    printf '  "runtime_pending": %s,\n' "$runtime_is_pending"
+    printf '  "evidence_file": "docs/runtime-tests/RUNTIME_RESULTS.md",\n'
     printf '  "included_paths": [\n'
     write_json_array "${INCLUDED_PATHS[@]}"
     printf '  ],\n'
@@ -163,7 +189,7 @@ while [ "$#" -gt 0 ]; do
   esac
 done
 
-VERSION="$(version_from_project_state)"
+VERSION="$(read_version)"
 [ -n "$VERSION" ] || fail "Could not read version from PROJECT_STATE.md"
 ROOT_NAME="$PACKAGE_NAME-$VERSION"
 PACKAGE_ROOT="$STAGING/$ROOT_NAME"
@@ -188,9 +214,41 @@ tar -czf "$TAR_PATH" -C "$STAGING" "$ROOT_NAME"
 write_manifest "zip"
 rm -f "$ZIP_PATH"
 if command -v zip >/dev/null 2>&1; then
-  (cd "$STAGING" && zip -qr "$ZIP_PATH" "$ROOT_NAME")
+  (cd "$STAGING" && zip -qr "$ROOT/$ZIP_PATH" "$ROOT_NAME")
 elif command -v powershell.exe >/dev/null 2>&1; then
-  powershell.exe -NoProfile -Command "Compress-Archive -LiteralPath '$PACKAGE_ROOT' -DestinationPath '$ZIP_PATH' -Force" >/dev/null
+  ps_package_root="$PACKAGE_ROOT"
+  ps_zip_path="$ROOT/$ZIP_PATH"
+  if command -v cygpath >/dev/null 2>&1; then
+    ps_package_root="$(cygpath -w "$PACKAGE_ROOT")"
+    ps_zip_path="$(cygpath -w "$ROOT/$ZIP_PATH")"
+  fi
+  PACKAGE_ROOT_WIN="$ps_package_root" ZIP_PATH_WIN="$ps_zip_path" powershell.exe -NoProfile -Command '
+$ErrorActionPreference = "Stop"
+$PackageRoot = $env:PACKAGE_ROOT_WIN
+$ZipPath = $env:ZIP_PATH_WIN
+Add-Type -AssemblyName System.IO.Compression
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+if (Test-Path -LiteralPath $ZipPath) {
+  Remove-Item -LiteralPath $ZipPath -Force
+}
+$zip = [System.IO.Compression.ZipFile]::Open($ZipPath, [System.IO.Compression.ZipArchiveMode]::Create)
+try {
+  $packageName = Split-Path -Leaf $PackageRoot
+  $rootPath = (Resolve-Path -LiteralPath $PackageRoot).Path.TrimEnd("\", "/")
+  Get-ChildItem -LiteralPath $PackageRoot -Recurse -File | ForEach-Object {
+    $relative = $_.FullName.Substring($rootPath.Length).TrimStart("\", "/") -replace "\\", "/"
+    $entryName = "$packageName/$relative"
+    [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile(
+      $zip,
+      $_.FullName,
+      $entryName,
+      [System.IO.Compression.CompressionLevel]::Optimal
+    ) | Out-Null
+  }
+} finally {
+  $zip.Dispose()
+}
+' >/dev/null
 else
   fail "zip or powershell.exe is required to create $ZIP_PATH"
 fi

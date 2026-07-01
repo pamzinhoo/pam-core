@@ -144,4 +144,18 @@ Permanent decision log for `pam-core`.
   separate from runtime installation and runtime confirmation.
 - Impact: Packages must exclude `.git`, `dist`, caches, logs, temporary files,
   and personal local artifacts. Package manifests keep
-  `runtime_status.runtime_pending` true until real runtime evidence is recorded.
+  `runtime_pending` true until real runtime evidence is recorded.
+
+## DEC-015
+- Date: 2026-07-01
+- Context: Phase 18.1 showed Codex CLI runtime loading `pam-core` from the
+  personal plugin cache, not from the generic Unix target
+  `~/.codex/plugins/pam-core`.
+- Decision: Support Codex CLI runtime installation through an explicit
+  `--codex-runtime-cache` adapter that targets the observed cache path. Never
+  select this cache target silently.
+- Motive: Runtime support must match the path the agent actually reads while
+  keeping cache writes visible, reversible, and validated.
+- Impact: The generic Unix Codex target remains available for file installation
+  tests, but supported Codex CLI runtime evidence applies only to the explicit
+  cache adapter until another source path is proven.

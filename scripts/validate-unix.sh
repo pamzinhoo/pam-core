@@ -71,6 +71,10 @@ required_items=(
   "DECISIONS.md"
   "VERSIONING.md"
   "docs/PACKAGING.md"
+  "docs/USAGE.md"
+  "docs/LINUX_TEST_PLAN.md"
+  "docs/KNOWN_LIMITATIONS.md"
+  "docs/RELEASE_READINESS.md"
 )
 
 for item in "${required_items[@]}"; do
@@ -99,6 +103,10 @@ done
 "$ROOT/scripts/runtime-smoke-test.sh" --help >/dev/null
 "$ROOT/scripts/package-release.sh" --help >/dev/null
 "$ROOT/scripts/validate-package.sh" --help >/dev/null
+grep -q -- '--codex-runtime-cache' "$ROOT/scripts/install-unix.sh" ||
+  fail "install-unix.sh must document --codex-runtime-cache"
+grep -q -- '--codex-runtime-cache' "$ROOT/scripts/uninstall-unix.sh" ||
+  fail "uninstall-unix.sh must document --codex-runtime-cache"
 
 if [ -n "$TARGET" ]; then
   TARGET="${TARGET%/}"

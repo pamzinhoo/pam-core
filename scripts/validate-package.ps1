@@ -26,6 +26,10 @@ $RequiredPaths = @(
   "docs/INSTALL_MACOS.md",
   "docs/AGENT_COMPATIBILITY.md",
   "docs/PACKAGING.md",
+  "docs/USAGE.md",
+  "docs/LINUX_TEST_PLAN.md",
+  "docs/KNOWN_LIMITATIONS.md",
+  "docs/RELEASE_READINESS.md",
   "docs/runtime-tests/"
 )
 $ForbiddenPatterns = @(
@@ -36,6 +40,8 @@ $ForbiddenPatterns = @(
   '(^|/)cache(/|$)',
   '(^|/)node_modules(/|$)',
   '(^|/)__pycache__(/|$)',
+  '(^|/)\.pytest_cache(/|$)',
+  '(^|/)\.mypy_cache(/|$)',
   '\.bak$',
   '\.tmp$',
   '(^|/)\.DS_Store$',
@@ -48,6 +54,24 @@ function Fail {
 }
 
 function Get-PamVersion {
+  $versionPath = Join-Path $PluginRoot "VERSION"
+  if (Test-Path -LiteralPath $versionPath -PathType Leaf) {
+    $version = (Get-Content -Raw -LiteralPath $versionPath).Trim()
+    if ($version -match '^[0-9]+\.[0-9]+\.[0-9][0-9A-Za-z.+-]*$') {
+      return $version
+    }
+    Fail "VERSION exists but does not contain a simple semver value"
+  }
+
+  $versioningPath = Join-Path $PluginRoot "VERSIONING.md"
+  if (Test-Path -LiteralPath $versioningPath -PathType Leaf) {
+    $versioningText = Get-Content -Raw -LiteralPath $versioningPath
+    $versioningMatch = [regex]::Match($versioningText, '(?m)^\s*(?:Current version|Manifest version|Version):\s*`?([0-9]+\.[0-9]+\.[0-9][0-9A-Za-z.+-]*)`?\s*$')
+    if ($versioningMatch.Success) {
+      return $versioningMatch.Groups[1].Value
+    }
+  }
+
   $statePath = Join-Path $PluginRoot "PROJECT_STATE.md"
   $text = Get-Content -Raw -LiteralPath $statePath
   $match = [regex]::Match($text, '(?m)^- Manifest version:\s*`?([0-9]+\.[0-9]+\.[0-9][0-9A-Za-z.+-]*)`?\s*$')
@@ -153,8 +177,8 @@ function Test-Manifest {
     if ($manifest.package_format -ne $Format) {
       Fail "Manifest package_format must be $Format in $ArchivePath"
     }
-    if (-not $manifest.runtime_status.runtime_pending) {
-      Fail "Manifest runtime_status.runtime_pending must be true while runtime is unconfirmed"
+    if (-not $manifest.runtime_pending) {
+      Fail "Manifest runtime_pending must be true while runtime is unconfirmed"
     }
   } finally {
     if (Test-Path -LiteralPath $temp) {
@@ -199,6 +223,11 @@ $checksumText = Get-Content -Raw -LiteralPath $checksumPath
 foreach ($fileName in @("pam-core-$version.zip", "pam-core-$version.tar.gz")) {
   if ($checksumText -notmatch [regex]::Escape($fileName)) {
     Fail "CHECKSUMS.txt is missing $fileName"
+  }
+  $artifactPath = Join-Path $DistPath $fileName
+  $expectedHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $artifactPath).Hash.ToLowerInvariant()
+  if ($checksumText -notmatch "(?m)^$expectedHash\s+\*?$([regex]::Escape($fileName))$") {
+    Fail "CHECKSUMS.txt hash does not match $fileName"
   }
 }
 

@@ -70,3 +70,20 @@ show that Claude Code:
 - Installation and file validation are supported.
 - Runtime loading is pending manual confirmation.
 - Claude Code plugin schema behavior may vary by version.
+
+## Phase 19 Discovery - 2026-07-01
+
+In the current Windows environment, Claude Code was not testable as a real
+runtime:
+
+- `where.exe claude` and `where.exe claude.cmd` did not find a command.
+- `Get-Command claude` and `Get-Command claude.cmd` did not find a command.
+- Git Bash `command -v claude` and `command -v claude.cmd` did not find a
+  command.
+- `~/.claude` and `~/.claude/plugins` exist.
+- `~/.claude/skills`, `~/.config/claude`, `%APPDATA%\Claude`,
+  `%LOCALAPPDATA%\Claude`, and `~/Library/Application Support/Claude` were not
+  found.
+
+Status remains `pending` until a real Claude Code command or app session can
+open the installed target and pass `SMOKE_TEST_PROMPTS.md`.

@@ -28,6 +28,10 @@ $IncludedPaths = @(
   "docs/INSTALL_MACOS.md",
   "docs/AGENT_COMPATIBILITY.md",
   "docs/PACKAGING.md",
+  "docs/USAGE.md",
+  "docs/LINUX_TEST_PLAN.md",
+  "docs/KNOWN_LIMITATIONS.md",
+  "docs/RELEASE_READINESS.md",
   "docs/runtime-tests"
 )
 
@@ -41,6 +45,8 @@ $ExcludedPatterns = @(
   "*.tmp",
   "node_modules/",
   "__pycache__/",
+  ".pytest_cache/",
+  ".mypy_cache/",
   ".DS_Store",
   "Thumbs.db"
 )
@@ -51,6 +57,24 @@ function Fail {
 }
 
 function Get-PamVersion {
+  $versionPath = Join-Path $PluginRoot "VERSION"
+  if (Test-Path -LiteralPath $versionPath -PathType Leaf) {
+    $version = (Get-Content -Raw -LiteralPath $versionPath).Trim()
+    if ($version -match '^[0-9]+\.[0-9]+\.[0-9][0-9A-Za-z.+-]*$') {
+      return $version
+    }
+    Fail "VERSION exists but does not contain a simple semver value"
+  }
+
+  $versioningPath = Join-Path $PluginRoot "VERSIONING.md"
+  if (Test-Path -LiteralPath $versioningPath -PathType Leaf) {
+    $versioningText = Get-Content -Raw -LiteralPath $versioningPath
+    $versioningMatch = [regex]::Match($versioningText, '(?m)^\s*(?:Current version|Manifest version|Version):\s*`?([0-9]+\.[0-9]+\.[0-9][0-9A-Za-z.+-]*)`?\s*$')
+    if ($versioningMatch.Success) {
+      return $versioningMatch.Groups[1].Value
+    }
+  }
+
   $statePath = Join-Path $PluginRoot "PROJECT_STATE.md"
   if (-not (Test-Path -LiteralPath $statePath -PathType Leaf)) {
     Fail "Missing PROJECT_STATE.md"
@@ -71,13 +95,16 @@ function Test-RuntimePending {
   }
 
   $runtimeRows = Get-Content -LiteralPath $resultsPath |
-    Where-Object { $_ -match '^\|\s*(Claude Code|Codex CLI|Codex App|Generic agent)\s*\|' }
-  foreach ($row in $runtimeRows) {
-    if ($row -match '\|\s*supported\s*\|') {
-      return $false
+    Where-Object { $_ -match '^\|\s*(Claude Code|Codex CLI|Codex App)\s*\|' }
+
+  foreach ($agent in @("Claude Code", "Codex CLI", "Codex App")) {
+    $row = $runtimeRows | Where-Object { $_ -match "^\|\s*$([regex]::Escape($agent))\s*\|" } | Select-Object -First 1
+    if (-not $row -or $row -notmatch '\|\s*supported\s*\|') {
+      return $true
     }
   }
-  return $true
+
+  return $false
 }
 
 function Copy-PackageItem {
@@ -124,10 +151,8 @@ function Write-PackageManifest {
     created_at = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
     source_commit = $sourceCommit
     package_format = $Format
-    runtime_status = [ordered]@{
-      runtime_pending = (Test-RuntimePending)
-      evidence_file = "docs/runtime-tests/RUNTIME_RESULTS.md"
-    }
+    runtime_pending = (Test-RuntimePending)
+    evidence_file = "docs/runtime-tests/RUNTIME_RESULTS.md"
     included_paths = $IncludedPaths
     excluded_patterns = $ExcludedPatterns
   }

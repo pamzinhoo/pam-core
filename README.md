@@ -28,6 +28,10 @@ noise, and boring maintainable code. It is intentionally project-agnostic.
 - `docs/INSTALL_LINUX.md` - Linux shell install, validate, and uninstall notes.
 - `docs/INSTALL_MACOS.md` - macOS shell install, validate, and uninstall notes.
 - `docs/PACKAGING.md` - versioned distribution package workflow.
+- `docs/USAGE.md` - practical install, validation, package, and runtime test guide.
+- `docs/LINUX_TEST_PLAN.md` - real Linux host validation plan.
+- `docs/KNOWN_LIMITATIONS.md` - current support boundaries and pending targets.
+- `docs/RELEASE_READINESS.md` - 1.2.0 release readiness status.
 - `docs/runtime-tests/` - manual runtime compatibility runbooks, prompts, and evidence records.
 - `scripts/install-windows.ps1` - Windows installer for the personal Codex marketplace.
 - `scripts/uninstall-windows.ps1` - Windows uninstaller for the local plugin copy.
@@ -68,13 +72,33 @@ See:
 
 - `docs/MULTI_AGENT_COMPATIBILITY.md`
 - `docs/AGENT_COMPATIBILITY.md`
+- `docs/USAGE.md`
+- `docs/LINUX_TEST_PLAN.md`
 - `docs/INSTALL_CODEX.md`
 - `docs/INSTALL_CLAUDE.md`
 - `docs/INSTALL_GENERIC.md`
 - `docs/INSTALL_LINUX.md`
 - `docs/INSTALL_MACOS.md`
 - `docs/PACKAGING.md`
+- `docs/KNOWN_LIMITATIONS.md`
+- `docs/RELEASE_READINESS.md`
 - `docs/runtime-tests/README.md`
+
+## Current Runtime Status
+
+- Codex CLI is supported only through the explicit
+  `--codex-runtime-cache` adapter.
+- The generic Codex CLI target `~/.codex/plugins/pam-core` is not proven as a
+  runtime source.
+- Claude Code and Codex App remain pending until real runtime sessions are
+  recorded.
+- Generic agents are manual because they require explicit context or target
+  setup.
+- Windows PowerShell and Git Bash on Windows have been validated.
+- Git Bash on Windows does not count as Linux native validation.
+- Linux native, WSL, and macOS native remain pending until real host validation
+  is recorded.
+- Global `runtime_pending` remains true.
 
 ## Governance
 
@@ -158,9 +182,14 @@ Install for a specific agent or manual target:
 ```bash
 bash scripts/install-unix.sh --agent claude-code --force
 bash scripts/install-unix.sh --agent codex-cli --force
+bash scripts/install-unix.sh --agent codex-cli --codex-runtime-cache --force
 bash scripts/install-unix.sh --agent codex-app --force
 bash scripts/install-unix.sh --agent generic --target /tmp/pam-core-test --force
 ```
+
+The Codex CLI runtime-supported path is the explicit
+`--codex-runtime-cache` adapter. The generic Codex CLI target is still not
+proven as a runtime source.
 
 Validate and uninstall a manual target:
 
@@ -202,7 +231,7 @@ package flow.
 codex.cmd --version
 ```
 
-The expected Codex CLI version for this release is `0.142.3`.
+The Codex CLI version recorded in the latest runtime evidence is `0.142.5`.
 
 Claude adapter validation is included at the end of `.\scripts\validate.ps1` and
 can also be run directly without Claude Code installed:

@@ -60,3 +60,6 @@ bash scripts/uninstall-unix.sh --target "$HOME/Library/Application Support/Codex
 - Claude Code and Codex runtime loading still need to be verified in the target
   application.
 - Detection uses known environment variables and common directories only.
+- Phase 19 did not run on macOS native because no macOS host was available in
+  the validation environment. macOS support remains pending until these scripts
+  are run on a real macOS host and evidence is recorded.
