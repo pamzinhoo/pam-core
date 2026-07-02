@@ -1,0 +1,1 @@
+"""Installable pam-core package."""

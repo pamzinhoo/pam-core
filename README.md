@@ -1,6 +1,39 @@
 # pam-core
 
-Reusable multi-agent skill pack for practical project work across repositories.
+AI Agent Runtime Engine based on skill orchestration.
+
+`pam-core` provides a safe, installable agent runtime base with a CLI command,
+persistent memory hooks, and skill orchestration foundations. It also preserves
+the original reusable multi-agent skill pack for practical project work across
+repositories.
+
+## PyPI Installation
+
+```bash
+pip install pam-core
+```
+
+For local development:
+
+```bash
+pip install -e .
+```
+
+## CLI Usage
+
+```bash
+pam run
+pam doctor
+pam memory
+```
+
+## Package Build
+
+```bash
+python -m build
+twine check dist/*
+twine upload dist/*
+```
 
 The pack favors small working changes, security at trust boundaries, low context
 noise, and boring maintainable code. It is intentionally project-agnostic.
