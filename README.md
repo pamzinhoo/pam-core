@@ -1,5 +1,184 @@
 # pam-core
 
+Portable AI agent runtime for skill-orchestrated development workflows.
+
+`pam-core` is an installable Python runtime and agent coordination framework for
+running portable AI agent workflows across local projects, CLIs, and compatible
+agent hosts. It packages a small runtime engine, a command-line interface,
+persistent memory hooks, and a reusable skill orchestration model that can be
+adapted to Codex, Claude Code, and generic agent environments.
+
+The project is designed for practical engineering work: predictable local
+execution, conservative safety boundaries, reusable project understanding, and
+clear quality gates before changes are handed off.
+
+## Key Features
+
+- Portable runtime core for AI agent workflows.
+- `pam` CLI entry point for running, checking, and inspecting the runtime.
+- Skill orchestration model for routing work to focused specialist instructions.
+- Persistent memory hooks for runtime state and future agent context.
+- Shared-core adapter layout for Codex, Claude Code, and generic agents.
+- Safety-first defaults for file operations, command execution, validation, and
+  trust boundaries.
+- Documentation and installer scripts for Linux, Windows, and macOS users.
+- Release packaging support for PyPI and source-distributed agent packs.
+
+## Installation
+
+`pam-core` requires Python 3.10 or newer. The package installs the `pam`
+console command.
+
+### Linux
+
+```bash
+python3 -m pip install pam-core
+```
+
+### Windows
+
+```powershell
+py -m pip install pam-core
+```
+
+### macOS
+
+```bash
+python3 -m pip install pam-core
+```
+
+For editable development from a cloned repository, install the local checkout:
+
+```bash
+python3 -m pip install -e .
+```
+
+On Windows, use `py -m pip install -e .` from the repository root.
+Platform-specific agent adapter installation notes are preserved in the legacy
+documentation below.
+
+## Usage
+
+Run one runtime cycle:
+
+```bash
+pam run
+```
+
+Check runtime health and local configuration:
+
+```bash
+pam doctor
+```
+
+Inspect runtime memory state:
+
+```bash
+pam memory
+```
+
+These commands are installed through the `pam` console script declared by the
+Python package.
+
+## 🧠 PAM PROTOCOL
+
+PAM PROTOCOL v1 is the universal interaction contract for external AI agents
+and tools that need to recognize and execute `pam-core`.
+
+Agents should detect these trigger keywords:
+
+- `use pam-core`
+- `run pam-core`
+- `pam-core`
+- `pam://`
+
+When a trigger is detected, agents should execute `pam-core` through one of the
+supported paths:
+
+```bash
+pam run
+```
+
+```http
+POST /run-once
+```
+
+```python
+import pam_core.runtime
+
+pam_core.runtime.run()
+```
+
+Protocol responses use this envelope:
+
+```json
+{
+  "tool": "pam-core",
+  "intent": "<detected_intent>",
+  "action": "<executed_action>",
+  "result": "<execution_result>"
+}
+```
+
+Supported PAM URI commands:
+
+- `pam://run`
+- `pam://doctor`
+- `pam://memory`
+
+See `docs/PAM_PROTOCOL.md` for the full protocol definition and integration
+rules.
+
+## Architecture Summary
+
+`pam-core` is organized around a small runtime engine and a shared skill pack:
+
+- `pam_core/` contains the Python package, CLI, adapters, runtime loop, and
+  configuration.
+- `skills/` contains reusable specialist instructions for implementation,
+  review, testing, security, documentation, deployment, and related work.
+- `AGENTS.md`, `CLAUDE.md`, and plugin manifests provide thin adapters for
+  supported agent hosts.
+- Governance files such as `MODULES.md`, `SKILL_DEPENDENCIES.md`,
+  `PROJECT_PROFILES.md`, and `QUALITY_GATES.md` define routing, ownership, and
+  validation expectations.
+- `docs/` and `scripts/` contain compatibility notes, installer flows,
+  validation commands, runtime smoke tests, and release packaging workflows.
+
+The intended model is a shared core with thin host-specific adapters. Runtime
+logic and skill behavior stay portable while each agent host gets only the
+metadata and installation layer it needs.
+
+## Safety Model
+
+`pam-core` treats repository content, logs, web pages, issues, prompts, and
+external files as untrusted input. The default operating model emphasizes:
+
+- preserving user work and avoiding destructive file operations;
+- validating installer, package, and runtime targets before handoff;
+- keeping security, data integrity, and permissions ahead of convenience;
+- separating prompt instructions from repository-controlled documentation;
+- using quality gates for testing, architecture, security, maintainability, UX,
+  documentation, performance, and release readiness when relevant.
+
+The framework is intended to support local automation without silently expanding
+scope or weakening validation boundaries.
+
+## Roadmap
+
+- Stabilize the Python runtime API and CLI behavior.
+- Expand runtime memory into a durable, documented developer-facing interface.
+- Complete real-host validation across Linux, Windows, macOS, WSL, Codex CLI,
+  Codex App, Claude Code, and generic agent targets.
+- Harden package metadata, release automation, and PyPI publishing workflows.
+- Improve adapter compatibility while keeping the shared core host-neutral.
+- Grow focused skill coverage without turning the framework into a broad,
+  duplicated instruction bundle.
+
+# 📜 Legacy Documentation
+
+## pam-core
+
 AI Agent Runtime Engine based on skill orchestration.
 
 `pam-core` provides a safe, installable agent runtime base with a CLI command,
@@ -7,7 +186,7 @@ persistent memory hooks, and skill orchestration foundations. It also preserves
 the original reusable multi-agent skill pack for practical project work across
 repositories.
 
-## PyPI Installation
+### PyPI Installation
 
 ```bash
 pip install pam-core
@@ -19,7 +198,7 @@ For local development:
 pip install -e .
 ```
 
-## CLI Usage
+### CLI Usage
 
 ```bash
 pam run
@@ -27,7 +206,7 @@ pam doctor
 pam memory
 ```
 
-## Package Build
+### Package Build
 
 ```bash
 python -m build
@@ -38,7 +217,7 @@ twine upload dist/*
 The pack favors small working changes, security at trust boundaries, low context
 noise, and boring maintainable code. It is intentionally project-agnostic.
 
-## Contents
+### Contents
 
 - `.codex-plugin/plugin.json` - Codex plugin manifest.
 - `.claude-plugin/plugin.json` - Claude Code plugin manifest.
@@ -81,7 +260,7 @@ noise, and boring maintainable code. It is intentionally project-agnostic.
 - `scripts/validate-claude.ps1` - local Claude adapter sanity checks.
 - `CHANGELOG.md` - release notes.
 
-## Multi-Agent Support
+### Multi-Agent Support
 
 `pam-core` now uses a shared-core, thin-adapter model.
 
@@ -117,7 +296,7 @@ See:
 - `docs/RELEASE_READINESS.md`
 - `docs/runtime-tests/README.md`
 
-## Current Runtime Status
+### Current Runtime Status
 
 - Codex CLI is supported only through the explicit
   `--codex-runtime-cache` adapter.
@@ -133,7 +312,7 @@ See:
   is recorded.
 - Global `runtime_pending` remains true.
 
-## Governance
+### Governance
 
 Start with these files when evolving the pack:
 
@@ -146,7 +325,7 @@ Start with these files when evolving the pack:
 7. `VERSIONING.md`
 8. `CONTRIBUTING.md`
 
-## Install on Windows
+### Install on Windows
 
 From this directory:
 
@@ -177,7 +356,7 @@ The installer copies this repository to `%USERPROFILE%\plugins\pam-core`, update
 `%USERPROFILE%\.agents\plugins\marketplace.json`, and refuses to overwrite the
 source when source and target resolve to the same path.
 
-## Update During Local Development
+### Update During Local Development
 
 1. Edit files in this repository.
 2. Run validation:
@@ -200,7 +379,7 @@ the same. It also excludes `.git`, `.agents`, `.codex`, `.cache`, `.tmp`,
 `node_modules`, common language caches, and temporary files from the installed
 plugin copy.
 
-## Install on Linux/macOS
+### Install on Linux/macOS
 
 From this directory:
 
@@ -236,7 +415,7 @@ bash scripts/uninstall-unix.sh --target /tmp/pam-core-test
 See `docs/INSTALL_LINUX.md`, `docs/INSTALL_MACOS.md`, and
 `docs/AGENT_COMPATIBILITY.md` for target defaults and known limitations.
 
-## Package a Release
+### Package a Release
 
 Windows:
 
@@ -257,7 +436,7 @@ Packages are written to `dist/` as `pam-core-VERSION.zip` and
 `docs/PACKAGING.md` for the allowlist, exclusions, and install-from-extracted
 package flow.
 
-## Validate
+### Validate
 
 ```powershell
 .\scripts\validate.ps1
@@ -287,7 +466,7 @@ Validation checks that:
   manual prompts in `docs/runtime-tests/SMOKE_TEST_PROMPTS.md` and evidence in
   `docs/runtime-tests/RUNTIME_RESULTS.md`.
 
-## Uninstall on Windows
+### Uninstall on Windows
 
 The uninstaller removes the local plugin source and removes the `pam-core` entry
 from the personal marketplace file. It does not run Codex commands.
@@ -298,7 +477,7 @@ from the personal marketplace file. It does not run Codex commands.
 
 Then start a new Codex thread so loaded plugin state is refreshed.
 
-## Manual Install
+### Manual Install
 
 Copy this folder to:
 

@@ -7,6 +7,7 @@ import json
 
 from pam_core.config import get_settings
 from pam_core.engine import PamCoreEngine
+from pam_core.protocol.parser import run
 from pam_core.runtime.loop import RuntimeLoop
 
 
@@ -23,7 +24,7 @@ def main() -> None:
     args = parser.parse_args()
 
     if args.once:
-        result = PamCoreEngine(settings).run_once()
+        result = run(PamCoreEngine(settings))
         print(json.dumps(result, indent=2, sort_keys=True))
         return
 

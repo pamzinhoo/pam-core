@@ -14,10 +14,10 @@ class CliAdapter(BaseAdapter):
 
     def translate_input(self, payload: dict[str, Any] | None = None) -> dict[str, Any]:
         payload = payload or {}
-        return {
+        return super().translate_input({
             "adapter": self.name,
             "role": payload.get("role", "cli"),
             "action": payload.get("action", "run"),
             "input": payload.get("input", ""),
             **payload,
-        }
+        })

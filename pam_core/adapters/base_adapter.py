@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from pam_core.engine import PamCoreEngine
+from pam_core.protocol.parser import doctor, execute_protocol, memory as protocol_memory, normalize_input
 
 
 class BaseAdapter:
@@ -17,20 +18,22 @@ class BaseAdapter:
 
     def translate_input(self, payload: dict[str, Any] | None = None) -> dict[str, Any]:
         payload = payload or {}
-        return {
+        protocol_request = normalize_input(payload)
+        protocol_request["context"] = {
+            **protocol_request.get("context", {}),
             "adapter": self.name,
-            **payload,
         }
+        return protocol_request
 
     def run_once(self, payload: dict[str, Any] | None = None) -> dict[str, Any]:
-        context = self.translate_input(payload)
-        self.engine.update_context(context)
-        return self.engine.run_once()
+        return execute_protocol(self.translate_input(payload), self.engine)
 
     def memory(self) -> dict[str, Any]:
-        return self.engine.memory()
+        result = protocol_memory(self.engine)
+        result["result"]["adapter"] = self.name
+        return result
 
     def health(self) -> dict[str, Any]:
-        health = self.engine.health()
-        health["adapter"] = self.name
-        return health
+        result = doctor(self.engine)
+        result["result"]["adapter"] = self.name
+        return result
