@@ -226,6 +226,47 @@ function Write-AuditReport {
   [System.IO.File]::WriteAllText($reportPath, (($lines -join "`n") + "`n"), $utf8NoBom)
 }
 
+$validationExcludedDirNames = New-Object System.Collections.Generic.HashSet[string]([System.StringComparer]::OrdinalIgnoreCase)
+@(
+  ".venv",
+  "venv",
+  "env",
+  ".env",
+  "__pycache__",
+  ".pytest_cache",
+  "build",
+  "dist",
+  ".git"
+) | ForEach-Object { [void]$validationExcludedDirNames.Add($_) }
+
+function Test-IsValidationExcludedDirectory {
+  param([System.IO.DirectoryInfo]$Directory)
+
+  return $validationExcludedDirNames.Contains($Directory.Name) -or $Directory.Name -like "*.egg-info"
+}
+
+function Get-RepositoryChildItem {
+  param(
+    [string]$Path,
+    [switch]$File,
+    [switch]$Directory
+  )
+
+  foreach ($child in Get-ChildItem -LiteralPath $Path -Force -ErrorAction SilentlyContinue) {
+    if ($child.PSIsContainer) {
+      if (Test-IsValidationExcludedDirectory $child) {
+        continue
+      }
+      if ($Directory) {
+        $child
+      }
+      Get-RepositoryChildItem -Path $child.FullName -File:$File -Directory:$Directory
+    } elseif ($File) {
+      $child
+    }
+  }
+}
+
 $criticalRootFiles = @(
   "AGENTS.md",
   "README.md",
@@ -593,7 +634,7 @@ foreach ($skillName in $skillNames) {
   $dependencyRepresentedSkills.Add($skillName)
 }
 
-$emptyFiles = Get-ChildItem -LiteralPath $PluginRoot -Force -Recurse -File |
+$emptyFiles = Get-RepositoryChildItem -Path $PluginRoot -File |
   Where-Object { $_.Length -eq 0 }
 if ($emptyFiles) {
   throw "Empty files found: $(@($emptyFiles | Select-Object -ExpandProperty FullName) -join ', ')"
@@ -612,7 +653,7 @@ foreach ($marketplacePath in $marketplacePaths) {
 $forbiddenDirs = @(".git", ".agents", ".codex", ".cache", ".tmp", "node_modules", "__pycache__", ".pytest_cache", ".mypy_cache", ".ruff_cache")
 $installExcludedWarnings = New-Object System.Collections.Generic.List[string]
 foreach ($dirName in $forbiddenDirs) {
-  $matches = Get-ChildItem -LiteralPath $PluginRoot -Force -Recurse -Directory -ErrorAction SilentlyContinue |
+  $matches = Get-RepositoryChildItem -Path $PluginRoot -Directory |
     Where-Object { $_.Name -eq $dirName }
   foreach ($match in $matches) {
     $childCount = @(Get-ChildItem -LiteralPath $match.FullName -Force -Recurse -ErrorAction SilentlyContinue).Count

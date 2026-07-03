@@ -1,6 +1,6 @@
 # pam-core Audit Report
 
-- Generated at: 2026-07-01 20:31:13 -03:00
+- Generated at: 2026-07-03 17:46:40 -03:00
 - Validation status: passed
 - Claude validation status: passed
 
@@ -135,7 +135,6 @@
 ## Install-Excluded Directory Warnings
 
 - Install-excluded directory is empty: .agents. It will not be copied by install-windows.ps1; remove it manually if it is leftover local state.
-- Install-excluded directory is present: .git (520 item(s)). It will not be copied by install-windows.ps1; keep it only if it is intentional local state.
 
 ## Automatically Validated
 

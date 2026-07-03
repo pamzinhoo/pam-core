@@ -41,8 +41,8 @@ def get_settings() -> RuntimeSettings:
         base_dir=base_dir,
         memory_path=memory_path,
         skills_path=skills_path,
-        host=os.getenv("PAM_CORE_HOST", "0.0.0.0"),
-        port=_int_env("PAM_CORE_PORT", 8000),
+        host=os.getenv("PAM_CORE_HOST", "127.0.0.1"),
+        port=_int_env("PAM_CORE_PORT", 8765),
         loop_interval=_float_env("PAM_CORE_LOOP_INTERVAL", 5.0),
     )
 

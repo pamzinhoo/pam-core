@@ -159,3 +159,17 @@ Permanent decision log for `pam-core`.
 - Impact: The generic Unix Codex target remains available for file installation
   tests, but supported Codex CLI runtime evidence applies only to the explicit
   cache adapter until another source path is proven.
+
+## DEC-016
+- Date: 2026-07-02
+- Context: The Python package metadata reported `1.0.0` while Codex and Claude
+  plugin manifests, project state, release docs, and the API Server reported
+  `1.2.0`.
+- Decision: Use the root `VERSION` file as the official version source.
+- Motive: Existing install and packaging scripts already prioritize `VERSION`
+  when present, and Python packaging can read the same file through dynamic
+  metadata.
+- Impact: `pyproject.toml` must read its version from `VERSION`. Plugin
+  manifests and project state keep explicit version fields for host
+  compatibility, but tests must verify they match `VERSION`. API endpoints must
+  return the `VERSION` value.

@@ -3,6 +3,14 @@
 `pam-core` follows semantic versioning with practical rules for a multi-agent
 skill pack.
 
+## Source of Truth
+The official project version is stored in the root `VERSION` file.
+
+Python packaging reads `VERSION` through `pyproject.toml` dynamic metadata.
+Codex and Claude plugin manifests must keep their `version` fields synchronized
+with `VERSION`, and tests enforce that alignment. API Server `/version` also
+returns the value from `VERSION`.
+
 ## Version Lines
 - `1.x`: compatible improvements to skills, docs, routing, validation, and
   installer behavior.

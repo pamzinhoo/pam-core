@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+- Phase 21: add a local read-only API Server MVP for inspecting pam-core and
+  resolving skills.
+- Add `pam_core.registry` to discover real skills, modules, adapters, required
+  files, frontmatter descriptions, derived tags, and dependency hints without a
+  database or internet access.
+- Add `pam_core.resolver` with deterministic heuristic skill selection based on
+  local skill metadata, task keywords, `project_type`, `agent`, and declared
+  dependency hints.
+- Add read-only server endpoints `GET /health`, `GET /skills`,
+  `GET /modules`, `GET /state`, and `POST /resolve`, with local defaults
+  `127.0.0.1:8765`.
+- Keep the resolver from inventing missing skills and keep the server from
+  executing commands, skills, plugins, shell operations, or external AI calls.
+- Update API Server docs and tests for the new MVP contract.
 - Phase 20: add release-facing documentation for usage, Linux host testing,
   known limitations, and 1.2.0 release readiness.
 - Add `docs/USAGE.md`, `docs/LINUX_TEST_PLAN.md`,

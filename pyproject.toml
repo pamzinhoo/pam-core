@@ -4,12 +4,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pam-core"
-version = "1.0.0"
 description = "AI Agent Runtime Engine based on skill orchestration"
 readme = "README.md"
 license = {text = "MIT"}
 authors = [{name="Pam"}]
 requires-python = ">=3.10"
+dynamic = ["version"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Environment :: Console",
@@ -29,8 +29,17 @@ dependencies = [
   "uvicorn"
 ]
 
+[project.optional-dependencies]
+test = [
+  "pytest",
+  "httpx"
+]
+
 [project.scripts]
 pam = "pam_core.cli.main:main"
 
 [tool.setuptools.packages.find]
 include = ["pam_core*"]
+
+[tool.setuptools.dynamic]
+version = {file = ["VERSION"]}

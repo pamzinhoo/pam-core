@@ -29,6 +29,10 @@ clear quality gates before changes are handed off.
 `pam-core` requires Python 3.10 or newer. The package installs the `pam`
 console command.
 
+The official project version is stored in the root `VERSION` file. Python
+package metadata, plugin manifests, and API Server `/version` are expected to
+stay aligned with that value.
+
 ### Linux
 
 ```bash
@@ -79,6 +83,100 @@ pam memory
 
 These commands are installed through the `pam` console script declared by the
 Python package.
+
+## API Server
+
+`pam-core` also includes an initial HTTP API Server layer for external apps that
+need to inspect the runtime and skill pack without depending directly on Codex
+App, Codex CLI, or Claude Code.
+
+Start the server from a development checkout or installed package. The default
+bind address is local-only:
+
+```powershell
+.\.venv\Scripts\python.exe -m pam_core.server
+```
+
+Or through the existing CLI:
+
+```powershell
+.\.venv\Scripts\pam.exe serve
+```
+
+Both commands default to `127.0.0.1:8765`. Use `--host` and `--port` only when
+you intentionally need different local settings.
+
+Read-only MVP endpoints:
+
+- `GET /health` - server status.
+- `GET /version` - current pam-core version from the official `VERSION` file.
+- `GET /skills` - real skills discovered from the configured `skills/` folder.
+- `GET /modules` - modules detected from `MODULES.md` and real skill
+  inventory.
+- `GET /state` - read-only project summary, adapters, required files, and
+  server mode.
+- `POST /resolve` - deterministic skill recommendations for a task.
+- `POST /select-skill` - legacy read-only alias that returns one suggested
+  skill.
+- `POST /optimize-prompt` - legacy structural prompt cleanup without external
+  AI.
+- `POST /analyze-static-security` - legacy defensive static checks for text,
+  code, or a safe relative project path.
+
+PowerShell examples:
+
+```powershell
+Invoke-RestMethod -Uri "http://127.0.0.1:8765/health"
+Invoke-RestMethod -Uri "http://127.0.0.1:8765/state"
+
+$skills = Invoke-RestMethod -Uri "http://127.0.0.1:8765/skills"
+$skills.count
+```
+
+```json
+{
+  "status": "ok",
+  "project": "pam-core",
+  "version": "1.2.0"
+}
+```
+
+Skill resolution example:
+
+```powershell
+$body = @{
+  task = "corrigir bug em FastAPI com autenticação"
+  agent = "codex"
+  project_type = "fastapi-app"
+} | ConvertTo-Json -Compress
+
+Invoke-RestMethod -Method Post `
+  -Uri "http://127.0.0.1:8765/resolve" `
+  -ContentType "application/json" `
+  -Body $body
+```
+
+`/resolve` uses transparent local heuristics only: task keywords, skill names,
+module names, descriptions, derived tags, `project_type`, `agent`, and declared
+dependencies when available. It does not call an LLM, embeddings, network APIs,
+plugins, shell commands, or skill code, and it never returns a skill that is not
+present in the local registry.
+
+External apps can consume the server by polling `GET /state` to confirm
+`server_mode: read_only`, then reading `GET /skills` and calling
+`POST /resolve` with the user's task. The MVP is intentionally inspection-only:
+it does not execute skills, mutate memory, run commands, install plugins,
+authenticate users, expose a public network listener by default, or provide a
+database-backed registry.
+
+Run the API Server tests from a local virtual environment:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -e .[test]
+.\.venv\Scripts\python.exe -m compileall pam_core
+.\.venv\Scripts\python.exe -m pytest
+```
 
 ## 🧠 PAM PROTOCOL
 

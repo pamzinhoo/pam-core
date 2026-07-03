@@ -3,17 +3,42 @@
 Long-term state for `pam-core`.
 
 ## Current Version
+- Official version: `1.2.0`
 - Manifest version: `1.2.0`
-- Governance state: Phase 20 completed
-- Last updated: 2026-07-01
-- Release status: Versioned distribution packaging is implemented in checkout;
-  Bash packaging validation passed under Git Bash. Phase 20 consolidated usage,
-  release readiness, known limitations, and the Linux test plan. Codex CLI is
-  supported through the explicit runtime cache adapter, and global runtime
-  status remains pending for Claude Code, Codex App, and native OS validation
-  not available in this environment.
+- Governance state: Phase 21 implemented
+- Last updated: 2026-07-03
+- Release status: Versioned distribution packaging remains implemented in
+  checkout. Phase 21 adds a local read-only API Server MVP, a real skill
+  registry, and the first deterministic skill resolver without changing the
+  official version. Codex CLI remains supported through the explicit runtime
+  cache adapter, and global runtime status remains pending for Claude Code,
+  Codex App, and native OS validation not available in this environment.
 
 ## Current Phase
+Phase 21 implemented: Local API Server MVP and Skill Resolver.
+
+Phase 21 adds a local read-only FastAPI server surface under
+`pam_core.server`, with defaults bound to `127.0.0.1:8765`. The MVP endpoints
+are:
+
+- `GET /health`
+- `GET /skills`
+- `GET /modules`
+- `GET /state`
+- `POST /resolve`
+
+The phase also adds `pam_core.registry` for tolerant in-memory discovery of
+real skills, modules, adapters, required files, frontmatter descriptions,
+derived tags, and dependency hints from existing markdown. It adds
+`pam_core.resolver` for deterministic keyword-based skill selection. The
+resolver does not call external AI, embeddings, local models, plugins, shell
+commands, or skill code, and it never returns skills missing from the local
+registry.
+
+The server is inspection-only in this phase. It does not execute skills, mutate
+runtime context, run commands, install plugins, expose a public listener by
+default, or require a database.
+
 Phase 20 completed: Release Readiness, Usage Guide, and Final Git Sync.
 
 Phase 20 added release-facing documentation without changing skills or module
@@ -201,6 +226,9 @@ behavior.
 - Phase 20 added usage, Linux test plan, known limitations, and release
   readiness docs for the 1.2.0 release candidate without changing skills or
   architecture.
+- Phase 21 added a local read-only API Server MVP, skill registry, deterministic
+  resolver, endpoint tests, and API Server documentation without creating or
+  removing skills.
 
 ## Existing Modules
 - Core
@@ -447,6 +475,10 @@ behavior.
   `dist`, caches, logs, temporary files, or personal local artifacts.
 - Packaging creates clean archives only. It must not perform runtime
   installation or mark runtime support as confirmed.
+- The local API Server MVP is read-only by default and must bind to
+  `127.0.0.1` unless the user explicitly overrides host settings.
+- The first resolver is deterministic and heuristic only; it must not invent
+  skills or call external AI/model services.
 
 ## Pending Work
 - Specify the future Meta Orchestrator before implementation. It should answer
@@ -482,8 +514,13 @@ behavior.
   have no confirmed runtime support.
 - Phase 19 found Git Bash on Windows but no WSL, Linux native, or macOS native
   environment. Native OS validation remains pending.
+- Phase 21 validation in this workspace is blocked until a usable Python
+  interpreter is available; the checked-in `.venv` points to an inaccessible
+  Python executable and `py -0p` reports no installed Pythons.
 
 ## Next Phase
+- Repair or recreate the local Python environment, then run the API Server
+  tests, compile checks, and existing validation scripts.
 - Run the Claude Code and Codex App runtime runbooks in real agent sessions.
 - Run the native validation sequence on WSL, Linux native, or macOS native hosts
   and record the evidence before changing those statuses.
