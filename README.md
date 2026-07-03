@@ -61,6 +61,116 @@ On Windows, use `py -m pip install -e .` from the repository root.
 Platform-specific agent adapter installation notes are preserved in the legacy
 documentation below.
 
+## Quickstart local
+
+Use this flow from a cloned repository when you want to install, validate, run,
+and smoke-test `pam-core` locally.
+
+### Create a virtual environment
+
+Windows:
+
+```bat
+py -m venv .venv
+.\.venv\Scripts\python.exe -m pip install --upgrade pip
+.\.venv\Scripts\python.exe -m pip install -e ".[test]"
+```
+
+Linux/macOS:
+
+```bash
+python3 -m venv .venv
+./.venv/bin/python -m pip install --upgrade pip
+./.venv/bin/python -m pip install -e ".[test]"
+```
+
+### Run validations
+
+Windows:
+
+```bat
+.\.venv\Scripts\python.exe -m compileall pam_core
+.\.venv\Scripts\python.exe -m pytest
+powershell -ExecutionPolicy Bypass -File .\scripts\validate.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\validate-claude.ps1
+git diff --check
+```
+
+Linux/macOS:
+
+```bash
+./.venv/bin/python -m compileall pam_core
+./.venv/bin/python -m pytest
+bash scripts/validate-unix.sh
+git diff --check
+```
+
+### Run the local API Server
+
+Windows:
+
+```bat
+.\.venv\Scripts\python.exe -m pam_core.server
+```
+
+Linux/macOS:
+
+```bash
+./.venv/bin/python -m pam_core.server
+```
+
+The default server address is:
+
+```txt
+http://127.0.0.1:8765
+```
+
+`GET /` can return `404`; that is normal. Use the API endpoints below.
+
+### Test the main endpoints
+
+```bash
+curl http://127.0.0.1:8765/health
+curl http://127.0.0.1:8765/version
+curl http://127.0.0.1:8765/skills
+curl http://127.0.0.1:8765/modules
+curl http://127.0.0.1:8765/state
+```
+
+Test `/resolve` from Linux, macOS, or Git Bash:
+
+```bash
+curl -X POST http://127.0.0.1:8765/resolve \
+  -H "Content-Type: application/json" \
+  -d '{"task":"corrigir bug em FastAPI com autenticação","agent":"codex","project_type":"fastapi-app"}'
+```
+
+Test `/resolve` from Windows CMD:
+
+```bat
+curl -X POST http://127.0.0.1:8765/resolve -H "Content-Type: application/json" -d "{\"task\":\"corrigir bug em FastAPI com autenticação\",\"agent\":\"codex\",\"project_type\":\"fastapi-app\"}"
+```
+
+### Available MVP endpoints
+
+```txt
+GET  /health
+GET  /version
+GET  /skills
+GET  /modules
+GET  /state
+POST /resolve
+```
+
+### MVP limitations
+
+- The API Server is local and read-only by default.
+- The resolver is heuristic and deterministic.
+- It does not use external AI, embeddings, or remote calls.
+- It does not execute system commands.
+- The registry reads local skills into memory.
+- Skill recommendations should still be reviewed for critical tasks.
+
 ## Usage
 
 Run one runtime cycle:
@@ -168,15 +278,6 @@ External apps can consume the server by polling `GET /state` to confirm
 it does not execute skills, mutate memory, run commands, install plugins,
 authenticate users, expose a public network listener by default, or provide a
 database-backed registry.
-
-Run the API Server tests from a local virtual environment:
-
-```powershell
-python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -e .[test]
-.\.venv\Scripts\python.exe -m compileall pam_core
-.\.venv\Scripts\python.exe -m pytest
-```
 
 ## 🧠 PAM PROTOCOL
 
